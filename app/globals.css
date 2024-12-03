@@ -33,6 +33,14 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --primary-200: #E3E3EA;
+    --primary-dark-900: #151723;
+    --primary-main-500: #273472;
+    --neutral-200: #E4E5E7;
+    --neutral-600: #8D8f94;
+    --neutral-700: #535559;
+    --neutral-800: #31343B;
+    --grey-300: #D0D0D0;
   }
   .dark {
     --background: 222.2 84% 4.9%;
@@ -70,3 +78,5 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+

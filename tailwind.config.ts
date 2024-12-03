@@ -22,8 +22,24 @@ export default {
   			},
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				foreground: 'hsl(var(--primary-foreground))',
+				200: "var(--primary-200)",
+				dark: {
+					900: "var(--primary-dark-900)"
+				},
+				main: {
+					500: "var(--primary-main-500)"
+				}
   			},
+			neutral: {
+				200: "var(--neutral-200)",
+				600: "var(--neutral-600)",
+				700: "var(--neutral-700)",
+				800: "var(--neutral-800)"
+			},
+			grey: {
+				300:"var(--grey-200)",
+			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
   				foreground: 'hsl(var(--secondary-foreground))'
@@ -51,10 +67,35 @@ export default {
   				'5': 'hsl(var(--chart-5))'
   			}
   		},
+		spacing: {
+			5: '22px',
+		},
+		fontSize: {
+			'xl-2': '12px',
+			'xl-3':'14px',
+			'xl-4': '16px',
+			'xl-4.5': '18px',
+			'xl-5': '28px',
+			'xl-8':'32px',
+		},
+		lineHeight: {
+			'20': '20px',
+		},
+		padding: {
+			'1.5': '6px',
+			'2.5': '10px'
+		},
+		fontFamily: {
+			inter: ['Inter'],
+			ubuntu: ['Ubuntu']
+		},
+		borderWidth: {
+			1: "1px"
+		},
   		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			// lg: 'var(--radius)',
+  			// md: 'calc(var(--radius) - 2px)',
+  			// sm: 'calc(var(--radius) - 4px)'
   		}
   	}
   },
