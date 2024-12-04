@@ -3,15 +3,49 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useState } from "react";
+import Select, { StylesConfig } from "react-select";
 
 export default function Registration() {
   const [step, setStep] = useState(0);
+  const [role, setRole] = useState<String | undefined>("");
+  const [userRole, setUserRole] = useState("personal");
+  const customStyles: StylesConfig<{ value: string; label: string }, false> = {
+    control: () => ({
+      display: "flex",
+      width: "100%",
+      padding: "16px 12px 16px 12px",
+      textSize: "16px",
+      border: "1px solid #E4E5E7",
+      borderRadius: "4px",
+    }),
+  };
 
+  const roles = [
+    { value: "pastors", label: "Pastors" },
+    { value: "directors", label: "Directors" },
+    { value: "hod", label: "HOD" },
+    { value: "deputy_hods", label: "Deputy HODs" },
+    { value: "colony_leaders", label: "Colony Leaders" },
+    { value: "captains", label: "Captains" },
+    { value: "workers", label: "Workers" },
+    { value: "members", label: "Members" },
+  ];
 
+  const ministryOptions = [
+    { value: "evangelism_and_mission", label: "Evangelism and Mission" },
+    { value: "small_groups", label: "Small Groups" },
+    { value: "worship_and_communications", label: "Worship & Communications" },
+    { value: "assimilation", label: "Assimilation" },
+    { value: "fellowship", label: "Fellowship" },
+    { value: "hod_academy", label: "HOD Academy" },
+    { value: "prayer", label: "Prayer" },
+    { value: "stewardship", label: "Stewardship" },
+    { value: "head_of_ministries", label: "Head of Ministries" },
+  ];
   return (
     <div className="flex flex-row h-screen">
-      <div className="w-1/2">
-        <div className="my-16 mx-20">
+      <div className="lg:flex-[5] flex-1 overflow-auto scrollbar">
+        <div className="my-8 lg:mx-20  md:mx-14 mx-8">
           <Link href="/" className="gap-2 flex items-center">
             <svg
               width="24"
@@ -41,8 +75,21 @@ export default function Registration() {
           </p>
 
           <div className="flex items-center justify-between mt-8">
-            <div className="flex items-center justify-between rounded-full border-neutral-600 border-1 p-2 gap-2">
-              <div className="rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center">
+            <div className={`
+                  ${userRole == 'personal'?  'flex border-red-600' : 'hidden border-neutral-600'}
+                  
+                   lg:flex
+                   items-center 
+                  rounded-full  border-1 p-2 gap-2
+                  flex-1
+                `}>
+              <div className={`
+                ${userRole == 'personal'?  'border-red-600' : 'border-neutral-600'}
+                rounded-full 
+                py-1 px-2.5 
+                border-1 flex items-center justify-center`
+
+                }>
                 <span>1</span>
               </div>
 
@@ -51,8 +98,17 @@ export default function Registration() {
               </p>
             </div>
 
-            <div className="h-[1px] bg-gray-400 mx-2 flex-1"></div>
-            <div className="flex items-center justify-between rounded-full border-neutral-600 border-1 p-2 gap-2">
+            <div className="h-[1px] bg-gray-400 mx-2 flex-1 lg:block hidden"></div>
+            <div 
+            // className="flex items-center justify-between rounded-full border-neutral-600 border-1 p-2 gap-2"
+              className={`
+                ${userRole == 'child'?  'flex' : 'hidden'}
+                lg:flex
+                items-center 
+                rounded-full border-neutral-600 border-1 p-2 gap-2
+                flex-1
+              `}>
+            
               <div className="rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center">
                 <span>2</span>
               </div>
@@ -61,8 +117,16 @@ export default function Registration() {
                 Child Informtion
               </p>
             </div>
-            <div className="h-[1px] bg-gray-400 mx-2 flex-1"></div>
-            <div className="flex items-center justify-between rounded-full border-neutral-600 border-1 p-2 gap-2">
+            <div className="h-[1px] bg-gray-400 mx-2 flex-1 lg:block hidden"></div>
+            <div 
+            // className="flex items-center justify-between rounded-full border-neutral-600 border-1 p-2 gap-2"
+              className={`
+                ${userRole == 'child'?  'flex' : 'hidden'}
+                lg:flex
+                items-center 
+                rounded-full border-neutral-600 border-1 p-2 gap-2
+                flex-1
+              `}>
               <div className="rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center">
                 <span>3</span>
               </div>
@@ -83,7 +147,6 @@ export default function Registration() {
             <p className="mt-6 mb-4 font-neutral-700 font-inter font-semibold text-xl-4.5">
               Basic Details
             </p>
-
             <form className="flex flex-col gap-6">
               {step == 0 && (
                 <div className="flex flex-col gap-6">
@@ -149,13 +212,13 @@ export default function Registration() {
                   <label className="text-xl-4 text-neutral-800 font-inter font-normal">
                     Phone Number
                   </label>
-                  <div className="flex gap-6">
-                    <div className="lg:w-1/5">
+                  <div className="flex lg:gap-6 gap-3">
+                    <div className="lg:w-1/5 w-20">
                       <select className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 appearance-none">
                         <option className="text-black">+234</option>
                       </select>
                     </div>
-                    <div className="lg:w-4/5">
+                    <div className="lg:w-4/5 w-full">
                       <input
                         placeholder="9173535098"
                         className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
@@ -171,10 +234,26 @@ export default function Registration() {
                     <label className="text-xl-4 text-neutral-800 font-inter font-normal">
                       Role in Church
                     </label>
-                    <select className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 appearance-none">
-                      <option disabled> Select Role</option>
-                    </select>
+                    <Select
+                      styles={customStyles}
+                      maxMenuHeight={150}
+                      onChange={(option) => setRole(option?.value)}
+                      options={roles}
+                    />
                   </div>
+                  {role != "" && (
+                    <div>
+                      <label className="text-xl-4 text-neutral-800 font-inter font-normal">
+                        Role in Church
+                      </label>
+
+                      <Select
+                        styles={customStyles}
+                        maxMenuHeight={150}
+                        options={ministryOptions}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -184,13 +263,13 @@ export default function Registration() {
                     Address
                   </p>
 
-                  <div className="flex gap-9">
+                  <div className="lg:flex gap-9">
                     <div className="lg:w-1/2">
                       <label className="text-xl-4 text-neutral-800 font-inter font-normal">
                         State Address
                       </label>
                       <input
-                        placeholder="Enter first name"
+                        placeholder="Enter state address"
                         className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
                       />
                     </div>
@@ -199,20 +278,20 @@ export default function Registration() {
                         Country
                       </label>
                       <input
-                        placeholder="Enter last name"
+                        placeholder="Enter country"
                         className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
                       />
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-9">
-                    <div className="flex gap-9">
+                    <div className="lg:flex gap-9">
                       <div className="lg:w-1/2">
                         <label className="text-xl-4 text-neutral-800 font-inter font-normal">
                           State
                         </label>
                         <input
-                          placeholder="Enter first name"
+                          placeholder="Enter state"
                           className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
                         />
                       </div>
@@ -221,7 +300,7 @@ export default function Registration() {
                           LGA/City
                         </label>
                         <input
-                          placeholder="Enter last name"
+                          placeholder="Enter lga/city"
                           className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
                         />
                       </div>
@@ -267,16 +346,16 @@ export default function Registration() {
                       event.preventDefault();
                       setStep((prev) => prev - 1);
                     }}
-                    
                   >
                     Previous
                   </Button>
                 )}
 
                 {step < 3 && (
-                  <Button onClick={(event) => {
-                    event.preventDefault();
-                    setStep((next) => next + 1);
+                  <Button
+                    onClick={(event) => {
+                      event.preventDefault();
+                      setStep((next) => next + 1);
                     }}
                     className={`${step == 0 ? "ml-auto" : ""}`}
                   >
@@ -284,19 +363,14 @@ export default function Registration() {
                   </Button>
                 )}
 
-                {step == 3 && (
-                  <Button type="submit"
-                  >
-                    Save and Proceed
-                  </Button>
-                )}
+                {step == 3 && <Button type="submit">Save and Proceed</Button>}
               </div>
             </form>
           </div>
         </div>
       </div>
 
-      <div className="bg-gray-900 w-1/2"></div>
+      <div className="bg-gray-900 flex-1 overflow-auto lg:flex-[4] lg:block hidden"></div>
     </div>
   );
 }

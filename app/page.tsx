@@ -3,12 +3,12 @@ import React from "react";
 
 const Home = () => {
   return (
-    <div className="flex items-center justify-center h-screen font-inter">
+    <div className="flex items-center justify-center lg:h-screen font-inter">
       <div className=" text-center ">
         <h2 className="text-primary-dark-900 text-xl-8 font-bold">You are a...</h2>
-        <p className="text-[16px] font-meduim text-neutral-700">Select the option that you belong to</p>
+        <p className="text-xl-4 font-meduim text-neutral-700">Select the option that you belong to</p>
 
-        <div className="lg:flex lg:gap-x-8 gap-y-8 m-14 justify-center items-center">
+        <div className="flex lg:flex-row flex-col lg:gap-x-8 gap-y-8 lg:m-14 m-6 justify-center items-center">
           <Link href="/registration" className="rounded  active:border-blue-600 focus:border-blue-600 border-neutral-200 border-1 flex flex-col justify-center items-center px-6 py-8">
             <div className="rounded-lg border-primary-200 border-2 p-5">
               <svg
@@ -34,7 +34,7 @@ const Home = () => {
               </svg>
             </div>
 
-            <p className="text-[18px] text-neutral-800 font-bold mt-6">Member/First Timer</p>
+            <p className="text-xl-4.5 text-neutral-800 font-bold mt-6">Member/First Timer</p>
             <p className="mt-3 text-xl-3 leading-20px break-words ">An HOD member or would like to be an HOD member </p>
           </Link>
 
