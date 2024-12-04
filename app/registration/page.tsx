@@ -7,8 +7,8 @@ import Select, { StylesConfig } from "react-select";
 
 export default function Registration() {
   const [step, setStep] = useState(0);
-  const [role, setRole] = useState<String | undefined>("");
-  const [userRole, setUserRole] = useState("personal");
+  const [role, setRole] = useState<string | undefined>("");
+  const [userRole] = useState("personal");
   const customStyles: StylesConfig<{ value: string; label: string }, false> = {
     control: () => ({
       display: "flex",
