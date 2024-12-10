@@ -38,7 +38,9 @@ export default {
 				800: "var(--neutral-800)"
 			},
 			grey: {
-				300:"var(--grey-200)",
+				200:"var(--grey-200)",
+				600:"var(--grey-600)",
+				800:"var(--grey-800)",
 			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
