@@ -8,7 +8,7 @@ export default function Registration() {
   return (
     <div className="flex flex-row h-screen">
       <div className="lg:flex-[5] flex-1 overflow-auto scrollbar">
-        <div className="my-8 lg:mx-20  md:mx-14 mx-8">
+        <div className="lg:max-w-[800px] my-8 lg:mx-20  md:mx-14 mx-8">
           <Link href="/" className="gap-2 flex items-center">
             <svg
               width="24"
