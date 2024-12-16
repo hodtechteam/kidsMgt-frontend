@@ -1,10 +1,22 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, createContext, useMemo } from "react";
 import ChildRegistration from "./childRegistration";
+import PersonalRegistration from "./personalRegistration";
+import CaregiverRegistration from "./caregiveRegistration";
+import { NavigationContext } from "./context/context";
+import Navigation from "./navigation";
 
 export default function Registration() {
-  const [userRole] = useState("personal");
+  const [userRole, setUserRole] = useState("personal");
+  const [activeRoles, setActiveRoles] = useState([]);
+
+
+  // useMemo(setActiveRoles({
+
+  // }), userRole)
+
+
   return (
     <div className="flex flex-row h-screen">
       <div className="lg:flex-[5] flex-1 overflow-auto scrollbar">
@@ -75,14 +87,26 @@ export default function Registration() {
             <div
               // className="flex items-center justify-between rounded-full border-neutral-600 border-1 p-2 gap-2"
               className={`
-                ${userRole == "child" ? "flex" : "hidden"}
+                ${
+                  userRole == "child"
+                    ? "flex border-red-600"
+                    : "hidden border-neutral-600"
+                }
                 lg:flex
                 items-center 
                 rounded-full border-neutral-600 border-1 p-2 gap-2
                 
               `}
             >
-              <div className="rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center">
+              <div
+                className={`
+                ${
+                  userRole == "child"
+                    ? "border-red-600"
+                    : "border-neutral-600"
+                }
+              rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center`}
+              >
                 <span>2</span>
               </div>
 
@@ -94,14 +118,20 @@ export default function Registration() {
             <div
               // className="flex items-center justify-between rounded-full border-neutral-600 border-1 p-2 gap-2"
               className={`
-                ${userRole == "child" ? "flex" : "hidden"}
+                ${userRole == "caregiver" ? "flex border-red-600 " : "hidden border-neutral-600"}
                 lg:flex
                 items-center 
                 rounded-full border-neutral-600 border-1 p-2 gap-2
                 
               `}
             >
-              <div className="rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center">
+              <div className={`
+                ${
+                  userRole == "caregiver"
+                    ? "border-red-600"
+                    : "border-neutral-600"
+                }
+                    rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center`}>
                 <span>3</span>
               </div>
 
@@ -110,8 +140,11 @@ export default function Registration() {
               </p>
             </div>
           </div>
-                <ChildRegistration/>
-         </div>
+
+          <NavigationContext.Provider value={{ userRole, setUserRole }}>
+            <Navigation />
+          </NavigationContext.Provider>
+        </div>
       </div>
 
       <div className="bg-gray-900 flex-1 overflow-auto lg:flex-[4] lg:block hidden"></div>
