@@ -8,7 +8,7 @@ import { NavigationContext } from "./context/context";
 import Navigation from "./navigation";
 
 export default function Registration() {
-  const [userRole, setUserRole] = useState("personal");
+  const [userRole, setUserRole] = useState("child");
   const [activeRoles, setActiveRoles] = useState([]);
 
 
