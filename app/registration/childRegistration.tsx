@@ -20,30 +20,51 @@ import { CheckBoxIcon } from "../svg/checkbox";
 import { Radio, Group } from "@mantine/core";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Trash } from "../svg/trash";
+import { ArrowDown } from "../svg/arrowDown";
+import { Chrevon } from "../svg/chrevon";
 
 const ChildRegistration = () => {
-  // const [step, setStep] = useState(0);
-  // const [role, setRole] = useState<string | undefined>("");
-  // const [subRole, setSubRole] = useState<string | undefined>("");
+  const [id, setId] = useState(1);
   const [userRole] = useState("personal");
   const context = useContext(NavigationContext);
   const [form, setForm] = useState([
     {
+      id,
       data: {
         firstName: "",
         lastName: "",
         gender: "",
-        childDob: "",
-        ageSection: "",
+        dob: "",
+        ageGroup: "",
         relationshipWithChild: "",
         relationshipWithParent: "",
         other: "",
         specialNeed: "",
       },
       added: false,
-      isOpen: false,
+      isOpen: true,
     },
   ]);
+
+  // localStorage.setItem("array", "[]");
+
+  type Form = {
+    id: number;
+    data: {
+      firstName: string;
+      lastName: string;
+      gender: string;
+      dob: string;
+      ageGroup: string;
+      relationshipWithChild: string;
+      relationshipWithParent: string;
+      specialNeed: string;
+      other?: string;
+    };
+    added: boolean;
+    isOpen: boolean;
+  };
 
   const Guardain = [
     { value: "parent", label: "Parent" },
@@ -63,7 +84,6 @@ const ChildRegistration = () => {
     { value: "other", label: "Other" },
   ];
 
-  
   const GuardianEnums = GuardianOptions.map((option) => option.value);
   const formSchema = z
     .object({
@@ -79,8 +99,9 @@ const ChildRegistration = () => {
       relationshipWithChild: z
         .string()
         .nonempty("Select a relationship with child"),
-      relationshipWithParent: z.string()
-      .nonempty("Specify the relationship with the child"),
+      relationshipWithParent: z
+        .string()
+        .nonempty("Specify the relationship with the child"),
       other: z.string().optional(),
       specialNeed: z.string(),
     })
@@ -95,7 +116,6 @@ const ChildRegistration = () => {
     )
     .refine(
       (data) =>
-        // First validation: Conditional enums for relationshipWithParent
         (data.relationshipWithChild === "parent" &&
           ["father", "mother"].includes(data.relationshipWithParent as any)) ||
         (data.relationshipWithChild === "guardian" &&
@@ -104,10 +124,7 @@ const ChildRegistration = () => {
         message: "Invalid relationship for the selected type",
         path: ["relationshipWithParent"], // Error focus
       }
-    )
-    ;
-
-  // message: "Please specify the relationship if 'Other' is selected"
+    );
   type FormFields = z.infer<typeof formSchema>;
 
   const {
@@ -130,9 +147,8 @@ const ChildRegistration = () => {
   const role = watch("relationshipWithChild");
   const subRole = watch("relationshipWithParent");
   const ageGroup = watch("ageGroup");
-  // console.log("DOB", role, subRole);
+ 
 
-  // const [ageGroup, setAgeGroup] = useState("");
   const ageGroups = [
     "Creche (6 months - 1 year)",
     "Ages 1 - 3",
@@ -183,74 +199,8 @@ const ChildRegistration = () => {
     let formData = localStorage.getItem("array");
     let addedFormData = formData ? JSON.parse(formData) : [];
 
-    setForm([...form, ...addedFormData]);
-  }, [])
-
-  // useEffect(())
-
-  // useMemo(() => {
-  //   // if (parseInt(dob.year) != 0 && dob.month != "" && dob.day > 0) {
-  //   if (dob != null) {
-  //     const age = new Date().getFullYear() - dob.getFullYear();
-  //     const month = new Date().getMonth() - dob.getMonth();
-  //     // const setAge = (groupName: string): typeof ageGroup => {
-  //     //   return ageGroup.map((group) =>
-  //     //     group.name === groupName
-  //     //       ? { ...group, state: true }
-  //     //       : { ...group, state: false }
-  //     //   );
-  //     // };
-
-  //     switch (true) {
-  //       case age === 0 && month >= 6 && age < 1:
-  //         // setAgeGroup(setAge("Creche (6 months - 1 year)"));
-  //         setAgegroup("Creche (6 months - 1 year)");
-  //         break;
-  //       case age >= 1 && age <= 3:
-  //         // ageGroup = "Ages 1 - 3";
-  //         setAgegroup("Ages 1 - 3");
-  //         // setAgeGroup(setAge("Ages 1 - 3"));
-  //         break;
-  //       case age >= 4 && age <= 5:
-  //         // ageGroup = "Ages 4 -5";
-  //         setAgegroup("Ages 4 - 5");
-  //         // setAgeGroup(setAge("Ages 4 -5"));
-  //         break;
-  //       case age >= 6 && age <= 8:
-  //         // ageGroup = "Ages 6 - 8";
-  //         setAgegroup("Ages 6 - 8");
-  //         // setAgeGroup(setAge("Ages 6 - 8"));
-  //         break;
-  //       case age >= 9 && age <= 12:
-  //         // ageGroup = "Ages 9 - 12";
-  //         setAgegroup("Ages 9 - 12");
-  //         // setAgeGroup(setAge("Ages 9 - 12"));
-  //         break;
-  //       default:
-  //         // console.log("default was called");
-  //         // ageGroup = "";
-  //         setAgegroup("");
-  //         // setAgeGroup(setAge("default"));
-  //         break;
-  //     }
-  //     setChildInformation((prevState) => ({
-  //       ...prevState,
-  //       ageSection: agegroup,
-  //       childDob: formattedDate,
-  //     }));
-  //   }
-
-  //   // console.log("age group", agegroup);
-  // }, [dob, agegroup]);
-
-  // let array = localStorage.getItem("array");
-  // let arraies = array ? JSON.parse(array) : [];
-
-  // const AddChild = () => {
-  //   console.log("arraies", arraies);
-  //   arraies.push(childInformation);
-  //   localStorage.setItem("array", JSON.stringify(arraies));
-  // };
+    setForm([...addedFormData, ...form]);
+  }, []);
 
   const customStyles: StylesConfig<{ value: string; label: string }, false> = {
     control: () => ({
@@ -267,25 +217,36 @@ const ChildRegistration = () => {
     setShowDatePicker((prev) => !prev);
   };
 
+  const DeleteForm = (id: number) => {
+    // console.log("form", form);
+    // console.log("filter", form.filter((formItem) => formItem.id != id))
+    setForm(form.filter((formItem) => formItem.id != id));
+    let array = localStorage.getItem("array");
+
+    // console.log("form", form)
+    // console.log("id", id)
+    // JSON.parse(array).filter((formItem: Form) => formItem.id != id)
+    if (array != null) {
+      localStorage.setItem(
+        "array",
+        JSON.stringify(form.slice(0, -1))
+      );
+    }
+  };
   const onSubmit = (data: FormFields, event: any) => {
     const formAction = event.nativeEvent.submitter.value;
+    
+    let array = localStorage.getItem("array");
+    let arraies = array ? JSON.parse(array) : [];
+    setId((prev) => prev + 1);
+    arraies.push({ id: id + 1, data, added: true, isOpen: false });
+    localStorage.setItem("array", JSON.stringify(arraies));
 
-    console.log("data here haha");
-    console.log("data", data);
-    console.log("formAction", formAction);
-
-    // if (formAction == "add") {
-
-      console.log("data", data, formAction);
-      let array = localStorage.getItem("array");
-      let arraies = array ? JSON.parse(array) : [];
-      arraies.push({ data, added: true, isOpen: false });
-      localStorage.setItem("array", JSON.stringify(arraies));
+    //update form
+    setForm([...arraies, ...form]);
+    //clear form
     // }
   };
-
-
-
 
   console.log("child information", form);
 
@@ -308,300 +269,278 @@ const ChildRegistration = () => {
         className="flex flex-col gap-6 mt-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        {form.map((item) => (
+        {form.map((item, index) => (
           <div>
-            <div className="flex flex-col gap-6">
-              <div className="lg:flex lg:gap-6 lg:items-center">
-                <div className="lg:w-1/2 gap-2 flex flex-col">
-                  <label className="text-xl-4 font-normal font-inter text-neutral-800">
-                    First Name
-                  </label>
-                  <input
-                    // onChange={(event) =>
-                    //   setChildInformation({
-                    //     ...childInformation,
-                    //     firstName: event.target.value,
-                    //   })
-                    // }
-                    {...register("firstName")}
-                    defaultValue={item.data.firstName}
-                    value={item.data.firstName}
-                    placeholder="Enter first name"
-                    className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
-                  />
-                  {errors.firstName && (
-                    <span className="text-red-700 text-xl-2 font-inter ml-2">
-                      {errors.firstName.message}
-                    </span>
-                  )}
-                </div>
-                <div className="lg:w-1/2 gap-2 flex flex-col">
-                  <label className="text-xl-4 font-normal font-inter text-neutral-800">
-                    Last Name
-                  </label>
-                  <input
-                    // onChange={(event) =>
-                    //   setChildInformation({
-                    //     ...childInformation,
-                    //     lastName: event.target.value,
-                    //   })
-                    // }
-                    {...register("lastName")}
-                    defaultValue={""}
-                    placeholder="Enter last name"
-                    className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
-                  />
-                  {errors.lastName && (
-                    <span className="text-red-700 text-xl-2 font-inter ml-2">
-                      {errors.lastName.message}
-                    </span>
+            {form.length > 1 && (
+              <div className="flex items-center justify-between">
+                <span>{`Child ${index + 1} (${item.data.firstName} ${
+                  item.data.lastName
+                })`}</span>
+
+                <div className="flex items-center">
+                  <Trash onClick={() => DeleteForm(item.id)} />
+                  {item.added ? (
+                    <Chrevon
+                      isOpen={item.isOpen}
+                      onClick={() =>
+                        setForm(
+                          form.map((formItem) =>
+                            formItem.id === item.id
+                              ? { ...formItem, isOpen: !formItem.isOpen }
+                              : formItem
+                          )
+                        )
+                      }
+                    />
+                  ) : (
+                    <Chrevon isOpen={item.isOpen} />
                   )}
                 </div>
               </div>
+            )}
 
-              <div>
-                <p className="text-xl-4 text-neutral-800 font-inter font-normal">
-                  Gender
-                </p>
-                <div className="flex">
-                  <div className="flex flex-row-reverse justify-end w-1/2 items-center gap-2">
-                    <label className="text-xl-4 font-normal font-inter text-neutral-800">
-                      Male
-                    </label>
-                    <input
-                      type="radio"
-                      // name="gender"
-                      value="male"
-                      className="h-6 w-6 rounded border-1 border-grey-300"
-                      // onChange={handleRadio}
-                      {...register("gender")}
-                      defaultValue={""}
-                    />
+            {
+              <div className={item.isOpen ? "block" : "hidden"}>
+                <div className="flex flex-col gap-6">
+                  <div className="lg:flex lg:gap-6 lg:items-center">
+                    <div className="lg:w-1/2 gap-2 flex flex-col">
+                      <label className="text-xl-4 font-normal font-inter text-neutral-800">
+                        First Name
+                      </label>
+                      <input
+                        {...register("firstName")}
+                        defaultValue={item.data.firstName}
+                        placeholder="Enter first name"
+                        className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
+                      />
+                      {errors.firstName && (
+                        <span className="text-red-700 text-xl-2 font-inter ml-2">
+                          {errors.firstName.message}
+                        </span>
+                      )}
+                    </div>
+                    <div className="lg:w-1/2 gap-2 flex flex-col">
+                      <label className="text-xl-4 font-normal font-inter text-neutral-800">
+                        Last Name
+                      </label>
+                      <input
+                        {...register("lastName")}
+                        defaultValue={""}
+                        placeholder="Enter last name"
+                        className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
+                      />
+                      {errors.lastName && (
+                        <span className="text-red-700 text-xl-2 font-inter ml-2">
+                          {errors.lastName.message}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="flex flex-row-reverse items-center justify-end w-1/2 gap-2">
-                    <label className="text-xl-4 font-normal font-inter text-neutral-800">
-                      Female
-                    </label>
-                    <input
-                      type="radio"
-                      // name="gender"
-                      value="female"
-                      className="h-6 w-6 rounded border-1 border-grey-300"
-                      // onChange={handleRadio}
-                      {...register("gender")}
-                      defaultValue={""}
-                    />
+                  <div>
+                    <p className="text-xl-4 text-neutral-800 font-inter font-normal">
+                      Gender
+                    </p>
+                    <div className="flex">
+                      <div className="flex flex-row-reverse justify-end w-1/2 items-center gap-2">
+                        <label className="text-xl-4 font-normal font-inter text-neutral-800">
+                          Male
+                        </label>
+                        <input
+                          type="radio"
+                          value="male"
+                          className="h-6 w-6 rounded border-1 border-grey-300"
+                          {...register("gender")}
+                          defaultValue={""}
+                        />
+                      </div>
+
+                      <div className="flex flex-row-reverse items-center justify-end w-1/2 gap-2">
+                        <label className="text-xl-4 font-normal font-inter text-neutral-800">
+                          Female
+                        </label>
+                        <input
+                          type="radio"
+                          value="female"
+                          className="h-6 w-6 rounded border-1 border-grey-300"
+                          {...register("gender")}
+                          defaultValue={""}
+                        />
+                      </div>
+                    </div>
+                    {errors.gender && (
+                      <span className="text-red-700 text-xl-2 font-inter ml-2">
+                        {errors.gender.message}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className=" flex flex-col gap-6">
+                    <div className="rounded bg-white">
+                      <label className="text-xl-4 text-neutral-800 font-inter font-normal flex items-center">
+                        Date of Birth
+                        <span className="text-red-700 text-xl-2 font-inter ml-2">
+                          Note: Dob should be less than 6 months or greater than
+                          12 years
+                        </span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          placeholder="Date of Bate"
+                          value={formattedDate}
+                          className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 w-full"
+                        />
+                        <DatePickerIcon
+                          toggleDatePicker={toggleDatePickerView}
+                        />
+                      </div>
+                      {showDatePicker && (
+                        <Controller
+                          control={control}
+                          name="dob"
+                          render={({ field: { onChange, value } }) => (
+                            <DatePicker
+                              onChange={onChange}
+                              value={value}
+                              style={{
+                                position: "absolute",
+                                zIndex: 9,
+                                backgroundColor: "white",
+                                borderRadius: "4px",
+                                right: 3,
+                              }}
+                            />
+                          )}
+                        />
+                      )}
+                      {errors.dob && (
+                        <span className="text-red-700 text-xl-2 font-inter ml-2">
+                          {errors.dob.message}
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      <p className="font-inter text-xl-4 text-neutral-800 mb-2 flex items-center">
+                        Age Division
+                      </p>
+                      <div className="grid lg:grid-cols-2 gap-y-6">
+                        {ageGroups.map((item) => (
+                          <div className="flex gap-2">
+                            <CheckBoxIcon state={item == ageGroup} />
+                            <span className="font-inter text-xl-4 text-neutral-800">
+                              {item}
+                            </span>
+                          </div>
+                        ))}
+
+                        <input
+                          type="hidden"
+                          {...register("ageGroup")}
+                          defaultValue={""}
+                          value={calculateAgeGroup(DOB)}
+                        />
+                      </div>
+                      {errors.ageGroup && (
+                        <span className="text-red-700 text-xl-2 font-inter ml-2">
+                          {errors.ageGroup.message}
+                        </span>
+                      )}
+                    </div>
+                    <Photo />
                   </div>
                 </div>
-                {errors.gender && (
-                  <span className="text-red-700 text-xl-2 font-inter ml-2">
-                    {errors.gender.message}
-                  </span>
-                )}
-              </div>
 
-              <div className=" flex flex-col gap-6">
-                <div className="rounded bg-white">
-                  <label className="text-xl-4 text-neutral-800 font-inter font-normal flex items-center">
-                    Date of Birth
-                    <span className="text-red-700 text-xl-2 font-inter ml-2">
-                      Note: Dob should be less than 6 months or greater than 12
-                      years
-                    </span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      placeholder="Date of Bate"
-                      value={formattedDate}
-                      className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 w-full"
-                    />
-                    {/* {agegroup == "" && (
-                  <span className="text-red-700 text-xl-2 font-inter mt-3">
-                    Child must be older than 6 months and less than 12 years
-                  </span>
-                )} */}
-
-                    <DatePickerIcon toggleDatePicker={toggleDatePickerView} />
-                  </div>
-                  {showDatePicker && (
+                <div className="flex flex-col gap-6">
+                  <div>
+                    <label className="text-xl-4 text-neutral-800 font-inter font-normal">
+                      Relationship with child
+                    </label>
                     <Controller
                       control={control}
-                      name="dob"
+                      name="relationshipWithChild"
+                      defaultValue=""
                       render={({ field: { onChange, value } }) => (
-                        <DatePicker
-                          onChange={onChange}
-                          value={value}
-                          style={{
-                            position: "absolute",
-                            zIndex: 9,
-                            backgroundColor: "white",
-                            borderRadius: "4px",
-                            right: 3,
-                          }}
+                        <Select
+                          placeholder="Select Relationship"
+                          styles={customStyles}
+                          maxMenuHeight={150}
+                          onChange={(option) => onChange(option?.value || "")}
+                          // defaultValue={""}
+                          options={Guardain}
                         />
                       )}
                     />
-                  )}
-                  {errors.dob && (
-                    <span className="text-red-700 text-xl-2 font-inter ml-2">
-                      {errors.dob.message}
-                    </span>
-                  )}
-                </div>
-
-                <div>
-                  <p className="font-inter text-xl-4 text-neutral-800 mb-2 flex items-center">
-                    Age Division
-                    {/* {ageGroup == "" && (
+                    {errors.relationshipWithChild && (
                       <span className="text-red-700 text-xl-2 font-inter ml-2">
-                        Dob less than 6 months or greater than 12 years
+                        {errors.relationshipWithChild.message}
                       </span>
-                    )} */}
-                  </p>
-                  <div className="grid lg:grid-cols-2 gap-y-6">
-                    {ageGroups.map((item) => (
-                      <div className="flex gap-2">
-                        <CheckBoxIcon state={item == ageGroup} />
-                        <span className="font-inter text-xl-4 text-neutral-800">
-                          {item}
-                        </span>
-                      </div>
-                    ))}
-
-                    <input
-                      type="hidden"
-                      {...register("ageGroup")}
-                      defaultValue={""}
-                      value={calculateAgeGroup(DOB)}
-                    />
-                  </div>
-                  {errors.ageGroup && (
-                    <span className="text-red-700 text-xl-2 font-inter ml-2">
-                      {errors.ageGroup.message}
-                    </span>
-                  )}
-                </div>
-                <Photo />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-6">
-              <div>
-                <label className="text-xl-4 text-neutral-800 font-inter font-normal">
-                  Relationship with child
-                </label>
-                <Controller
-                  control={control}
-                  name="relationshipWithChild"
-                  defaultValue=""
-                  render={({ field: { onChange, value } }) => (
-                    <Select
-                      placeholder="Select Relationship"
-                      styles={customStyles}
-                      maxMenuHeight={150}
-                      onChange={(option) => onChange(option?.value || "")}
-                      // defaultValue={""}
-                      options={Guardain}
-                    />
-                  )}
-                />
-                {errors.relationshipWithChild && (
-                  <span className="text-red-700 text-xl-2 font-inter ml-2">
-                    {errors.relationshipWithChild.message}
-                  </span>
-                )}
-                {/* onChange={(option) => {
-                      setRole(option?.value);
-                      setChildInformation((prevState) => ({
-                        ...prevState,
-                        relationshipWithChild: option?.value!,
-                      }));
-                    }} */}
-                {/* <ReactDatePicker
-                      onChange={onChange} // send value to hook form
-                      onBlur={onBlur} // notify when input is touched/blur
-                      selected={value}
-                    /> */}
-              </div>
-              {role && (
-                <div>
-                  <label className="text-xl-4 text-neutral-800 font-inter font-normal">
-                    Relationship Type
-                  </label>
-                  <Controller
-                    control={control}
-                    name="relationshipWithParent"
-                    render={({ field: { onChange, value } }) => (
-                      <Select
-                        placeholder="Select Relationship Type"
-                        styles={customStyles}
-                        maxMenuHeight={150}
-                        onChange={(option) => onChange(option?.value || "")}
-                        options={option}
-                      />
                     )}
-                  />
-                  {errors.relationshipWithParent && (
-                    <span className="text-red-700 text-xl-2 font-inter ml-2">
-                      {errors.relationshipWithParent.message}
-                    </span>
+                  </div>
+                  {role && (
+                    <div>
+                      <label className="text-xl-4 text-neutral-800 font-inter font-normal">
+                        Relationship Type
+                      </label>
+                      <Controller
+                        control={control}
+                        name="relationshipWithParent"
+                        render={({ field: { onChange, value } }) => (
+                          <Select
+                            placeholder="Select Relationship Type"
+                            styles={customStyles}
+                            maxMenuHeight={150}
+                            onChange={(option) => onChange(option?.value || "")}
+                            options={option}
+                          />
+                        )}
+                      />
+                      {errors.relationshipWithParent && (
+                        <span className="text-red-700 text-xl-2 font-inter ml-2">
+                          {errors.relationshipWithParent.message}
+                        </span>
+                      )}
+                    </div>
                   )}
+                  {role == "guardian" && subRole == "other" && (
+                    <div>
+                      <input
+                        {...register("other", {
+                          required: "specify a relationship",
+                        })}
+                        placeholder="Specify relationship"
+                        className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 w-full"
+                      />
+                      {errors.relationshipWithParent && (
+                        <span className="text-red-700 text-xl-2 font-inter ml-2">
+                          {errors.relationshipWithParent.message}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-1">
+                    <label>Special Need(s)</label>
+                    <textarea
+                      {...register("specialNeed")}
+                      defaultValue={""}
+                      name=""
+                      id=""
+                      className="rounded border-gray-300 border resize-none scroll-smooth h-[100px]"
+                      placeholder="Provide information on any special type of care that may need to be provided for the child."
+                    ></textarea>
+                  </div>
                 </div>
-              )}
 
-              {/* {(option) => {
-                      setSubRole(option?.value);
-                      setChildInformation((prevState) => ({
-                        ...prevState,
-                        relationshipWithParent: option?.value!,
-                      }));
-                    }} */}
-              {role == "guardian" && subRole == "other" && (
-                <div>
-                  <input
-                    {...register("other", {
-                      required: "specify a relationship",
-                    })}
-                    // value={childInformation.other}
-                    placeholder="Specify relationship"
-                    className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 w-full"
-                    // onChange={(event) =>
-                    //   setChildInformation((prevState) => ({
-                    //     ...prevState,
-                    //     other: event.target.value,
-                    //   }))
-                    // }
-                  />
-                  {errors.relationshipWithParent && (
-                    <span className="text-red-700 text-xl-2 font-inter ml-2">
-                      {errors.relationshipWithParent.message}
-                    </span>
-                  )}
+                <div className="flex justify-between">
+                  <button className="flex items-center text-red-700 cursor-pointer">
+                    <Plus />
+                    Add another child
+                  </button>
+                  <button type="submit">Save and Proceed</button>
+                  {/* <Button type="submit" >Save and Proceed</Button> */}
                 </div>
-              )}
-              <div className="flex flex-col gap-1">
-                <label>Special Need(s)</label>
-                <textarea
-                  // value={childInformation.specialNeed}
-                  {...register("specialNeed")}
-                  defaultValue={""}
-                  name=""
-                  id=""
-                  className="rounded border-gray-300 border resize-none scroll-smooth h-[100px]"
-                  placeholder="Provide information on any special type of care that may need to be provided for the child."
-                ></textarea>
               </div>
-            </div>
-
-            <div className="flex justify-between">
-              <button className="flex items-center text-red-700 cursor-pointer">
-                <Plus />
-                Add another child
-              </button>
-              <button type="submit">Save and Proceed</button>
-              {/* <Button type="submit" >Save and Proceed</Button> */}
-            </div>
+            }
           </div>
         ))}
       </form>
