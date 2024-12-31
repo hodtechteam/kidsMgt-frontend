@@ -5,8 +5,8 @@ import Link from "next/link";
 import { Accordion } from "@mantine/core";
 import { useContext, useEffect, useMemo, useState } from "react";
 import Select, { StylesConfig } from "react-select";
-import { z } from "zod";
-import { DatePicker } from "@mantine/dates";
+import { number, z } from "zod";
+import { DatePicker, DateValue } from "@mantine/dates";
 import {
   Popover,
   PopoverContent,
@@ -18,53 +18,29 @@ import { NavigationContext } from "./context/context";
 import { DatePickerIcon } from "../svg/datePicker";
 import { CheckBoxIcon } from "../svg/checkbox";
 import { Radio, Group } from "@mantine/core";
-import { Controller, useForm } from "react-hook-form";
+import { useClickOutside } from "@mantine/hooks";
+import {
+  Controller,
+  FieldError,
+  FieldErrors,
+  useFieldArray,
+  useForm,
+  UseFormProps,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash } from "../svg/trash";
 import { ArrowDown } from "../svg/arrowDown";
-import { Chrevon } from "../svg/chrevon";
+import { childSchema, FormSchemaType, Userschema } from "./schema";
+import { ArrowUp } from "../svg/arrowUp";
 
 const ChildRegistration = () => {
-  const [id, setId] = useState(1);
+  const [role, setRole] = useState<string | null>(null);
+  const [subRole, setSubRole] = useState<string | null>(null);
+  const [formattedDate, setFormattedDate] = useState<string>("");
+  const [opened, setOpened] = useState(false);
+  const ref = useClickOutside(() => setOpened(false));
   const [userRole] = useState("personal");
   const context = useContext(NavigationContext);
-  const [form, setForm] = useState([
-    {
-      id,
-      data: {
-        firstName: "",
-        lastName: "",
-        gender: "",
-        dob: "",
-        ageGroup: "",
-        relationshipWithChild: "",
-        relationshipWithParent: "",
-        other: "",
-        specialNeed: "",
-      },
-      added: false,
-      isOpen: true,
-    },
-  ]);
-
-  // localStorage.setItem("array", "[]");
-
-  type Form = {
-    id: number;
-    data: {
-      firstName: string;
-      lastName: string;
-      gender: string;
-      dob: string;
-      ageGroup: string;
-      relationshipWithChild: string;
-      relationshipWithParent: string;
-      specialNeed: string;
-      other?: string;
-    };
-    added: boolean;
-    isOpen: boolean;
-  };
 
   const Guardain = [
     { value: "parent", label: "Parent" },
@@ -85,69 +61,40 @@ const ChildRegistration = () => {
   ];
 
   const GuardianEnums = GuardianOptions.map((option) => option.value);
-  const formSchema = z
-    .object({
-      firstName: z.string().min(3, "FirstName is required"),
-      lastName: z.string().min(3, "LastName is required"),
-      gender: z.enum(["male", "female"], {
-        required_error: "Gender is required",
-      }),
-      dob: z.date(),
-      ageGroup: z
-        .string()
-        .nonempty("Age Group cannot be empty, select a valid dob"),
-      relationshipWithChild: z
-        .string()
-        .nonempty("Select a relationship with child"),
-      relationshipWithParent: z
-        .string()
-        .nonempty("Specify the relationship with the child"),
-      other: z.string().optional(),
-      specialNeed: z.string(),
-    })
-    .refine(
-      (data) =>
-        data.relationshipWithParent != "other" ||
-        (data.relationshipWithParent === "other" && data.other),
-      {
-        message: "Please specify the relationship if 'Other' is selected",
-        path: ["other"],
-      }
-    )
-    .refine(
-      (data) =>
-        (data.relationshipWithChild === "parent" &&
-          ["father", "mother"].includes(data.relationshipWithParent as any)) ||
-        (data.relationshipWithChild === "guardian" &&
-          GuardianEnums.includes(data.relationshipWithParent as any)),
-      {
-        message: "Invalid relationship for the selected type",
-        path: ["relationshipWithParent"], // Error focus
-      }
-    );
-  type FormFields = z.infer<typeof formSchema>;
+
+  const defaultValue = {
+    firstName: "",
+    lastName: "",
+    gender: undefined,
+    dob: new Date(),
+    ageGroup: "",
+    relationshipWithChild: "",
+    relationshipWithParent: "",
+    specialNeed: "",
+    other: "",
+  };
 
   const {
     register,
     control,
     setValue,
+    getValues,
     watch,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormFields>({
-    resolver: zodResolver(formSchema),
+  } = useForm<FormSchemaType>({
+    resolver: zodResolver(Userschema),
+    defaultValues: {
+      child: [defaultValue],
+    },
   });
 
-  const [dob, setDob] = useState<Date | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState<boolean>(false);
+  const { fields, append, remove, prepend } = useFieldArray({
+    name: "child",
+    control,
+  });
 
-  // console.log({ dob });
-
-  const DOB = watch("dob");
-  const role = watch("relationshipWithChild");
-  const subRole = watch("relationshipWithParent");
-  const ageGroup = watch("ageGroup");
- 
+  const [id, setId] = useState(0);
 
   const ageGroups = [
     "Creche (6 months - 1 year)",
@@ -156,14 +103,6 @@ const ChildRegistration = () => {
     "Ages 6 - 8",
     "Ages 9 - 12",
   ];
-
-  const formattedDate = dob
-    ? new Intl.DateTimeFormat("en-CA", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(dob)
-    : "";
 
   // localStorage.setItem("array", JSON.stringify([]));
   const calculateAgeGroup = (dob: Date) => {
@@ -187,68 +126,49 @@ const ChildRegistration = () => {
     }
   };
 
-  useMemo(() => {
-    const ageGroup = calculateAgeGroup(DOB);
-    // setAgeGroup(ageGroup);
-    setValue("ageGroup", ageGroup, { shouldValidate: true });
+  const children = watch("child");
 
-    console.log("agegroup set");
-  }, [DOB, setValue]);
-
-  useEffect(() => {
-    let formData = localStorage.getItem("array");
-    let addedFormData = formData ? JSON.parse(formData) : [];
-
-    setForm([...addedFormData, ...form]);
-  }, []);
+  // console.log("children", children)
+  const AddAgeGroup = (date: Date | null, index: number) => {
+    const ageGroup = calculateAgeGroup(date!);
+    setValue(`child.${index}.ageGroup`, ageGroup, { shouldValidate: true });
+    setFormattedDate(date!.toISOString().slice(0, 10));
+  };
 
   const customStyles: StylesConfig<{ value: string; label: string }, false> = {
     control: () => ({
       display: "flex",
       width: "100%",
-      padding: "16px 12px 16px 12px",
-      textSize: "16px",
+      padding: "12px 12px 12px 12px",
+      textSize: "14px",
       border: "1px solid #E4E5E7",
       borderRadius: "4px",
     }),
   };
 
-  const toggleDatePickerView = () => {
-    setShowDatePicker((prev) => !prev);
+  const onSubmit = (data: any, event: any) => {
+    const formAction = event.nativeEvent.submitter.value;
+
+    console.log("data", data);
   };
 
-  const DeleteForm = (id: number) => {
-    // console.log("form", form);
-    // console.log("filter", form.filter((formItem) => formItem.id != id))
-    setForm(form.filter((formItem) => formItem.id != id));
-    let array = localStorage.getItem("array");
-
-    // console.log("form", form)
-    // console.log("id", id)
-    // JSON.parse(array).filter((formItem: Form) => formItem.id != id)
-    if (array != null) {
-      localStorage.setItem(
-        "array",
-        JSON.stringify(form.slice(0, -1))
-      );
+  const handleAppend = () => {
+    const currentFieldValue = getValues(`child.${fields.length - 1}`);
+    try {
+      childSchema.parse(currentFieldValue);
+      append(defaultValue);
+    } catch (error) {
+      console.log("validation error", error, "errors", errors);
     }
   };
-  const onSubmit = (data: FormFields, event: any) => {
-    const formAction = event.nativeEvent.submitter.value;
-    
-    let array = localStorage.getItem("array");
-    let arraies = array ? JSON.parse(array) : [];
-    setId((prev) => prev + 1);
-    arraies.push({ id: id + 1, data, added: true, isOpen: false });
-    localStorage.setItem("array", JSON.stringify(arraies));
 
-    //update form
-    setForm([...arraies, ...form]);
-    //clear form
-    // }
-  };
+  useEffect(() => {
+    setId(fields.length - 1);
+    console.log("formattedDate here", formattedDate);
+    console.log("Fields updated:", fields, "id", fields.length - 1);
+  }, [fields]);
 
-  console.log("child information", form);
+  // console.log("child information", form);
 
   // console.log("childInformation", childInformation);
   // onClick={() => context?.setUserRole("caregiver")}
@@ -264,43 +184,38 @@ const ChildRegistration = () => {
       </p>
 
       <hr />
-
       <form
         className="flex flex-col gap-6 mt-6"
         onSubmit={handleSubmit(onSubmit)}
       >
-        {form.map((item, index) => (
-          <div>
-            {form.length > 1 && (
+        {fields.map((field, index) => (
+          <div key={field.id}>
+            {fields.length > 1 && (
               <div className="flex items-center justify-between">
-                <span>{`Child ${index + 1} (${item.data.firstName} ${
-                  item.data.lastName
-                })`}</span>
+                <span>{`
+                   ${
+                     index < fields.length - 1
+                       ? `(
+                  ${getValues(`child.${index}.firstName`)} ${getValues(
+                           `child.${index}.lastName`
+                         )}
+                   )`
+                       : ""
+                   }
+                  
+                  `}</span>
 
                 <div className="flex items-center">
-                  <Trash onClick={() => DeleteForm(item.id)} />
-                  {item.added ? (
-                    <Chrevon
-                      isOpen={item.isOpen}
-                      onClick={() =>
-                        setForm(
-                          form.map((formItem) =>
-                            formItem.id === item.id
-                              ? { ...formItem, isOpen: !formItem.isOpen }
-                              : formItem
-                          )
-                        )
-                      }
-                    />
-                  ) : (
-                    <Chrevon isOpen={item.isOpen} />
-                  )}
+                  <Trash onClick={() => remove(index)} />
+                  <div onClick={() => setId(index)}>
+                    {index == id ? <ArrowUp /> : <ArrowDown />}
+                  </div>
                 </div>
               </div>
             )}
 
             {
-              <div className={item.isOpen ? "block" : "hidden"}>
+              <div className={`${index == id ? "block" : "hidden"}`}>
                 <div className="flex flex-col gap-6">
                   <div className="lg:flex lg:gap-6 lg:items-center">
                     <div className="lg:w-1/2 gap-2 flex flex-col">
@@ -308,14 +223,14 @@ const ChildRegistration = () => {
                         First Name
                       </label>
                       <input
-                        {...register("firstName")}
-                        defaultValue={item.data.firstName}
+                        {...register(`child.${index}.firstName`)}
+                        // defaultValue={child.$[]firstName}
                         placeholder="Enter first name"
-                        className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
+                        className="py-3 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
                       />
-                      {errors.firstName && (
+                      {errors.child?.[index]?.firstName && (
                         <span className="text-red-700 text-xl-2 font-inter ml-2">
-                          {errors.firstName.message}
+                          {errors.child?.[index]?.firstName.message}
                         </span>
                       )}
                     </div>
@@ -324,14 +239,14 @@ const ChildRegistration = () => {
                         Last Name
                       </label>
                       <input
-                        {...register("lastName")}
+                        {...register(`child.${index}.lastName`)}
                         defaultValue={""}
                         placeholder="Enter last name"
-                        className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
+                        className="py-3 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
                       />
-                      {errors.lastName && (
+                      {errors.child?.[index]?.lastName && (
                         <span className="text-red-700 text-xl-2 font-inter ml-2">
-                          {errors.lastName.message}
+                          {errors.child?.[index]?.lastName.message}
                         </span>
                       )}
                     </div>
@@ -350,7 +265,7 @@ const ChildRegistration = () => {
                           type="radio"
                           value="male"
                           className="h-6 w-6 rounded border-1 border-grey-300"
-                          {...register("gender")}
+                          {...register(`child.${index}.gender`)}
                           defaultValue={""}
                         />
                       </div>
@@ -363,14 +278,14 @@ const ChildRegistration = () => {
                           type="radio"
                           value="female"
                           className="h-6 w-6 rounded border-1 border-grey-300"
-                          {...register("gender")}
+                          {...register(`child.${index}.gender`)}
                           defaultValue={""}
                         />
                       </div>
                     </div>
-                    {errors.gender && (
+                    {errors.child?.[index]?.gender && (
                       <span className="text-red-700 text-xl-2 font-inter ml-2">
-                        {errors.gender.message}
+                        {errors.child?.[index]?.gender.message}
                       </span>
                     )}
                   </div>
@@ -388,19 +303,24 @@ const ChildRegistration = () => {
                         <input
                           placeholder="Date of Bate"
                           value={formattedDate}
-                          className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 w-full"
+                          readOnly
+                          className="py-3 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 w-full"
                         />
                         <DatePickerIcon
-                          toggleDatePicker={toggleDatePickerView}
+                          toggleDatePicker={() => setOpened(true)}
                         />
                       </div>
-                      {showDatePicker && (
+                      {opened && (
                         <Controller
                           control={control}
-                          name="dob"
+                          name={`child.${index}.dob`}
                           render={({ field: { onChange, value } }) => (
                             <DatePicker
-                              onChange={onChange}
+                              ref={ref}
+                              onChange={(date: DateValue) => {
+                                setValue(`child.${index}.dob`, date!);
+                                AddAgeGroup(date, index);
+                              }}
                               value={value}
                               style={{
                                 position: "absolute",
@@ -413,9 +333,9 @@ const ChildRegistration = () => {
                           )}
                         />
                       )}
-                      {errors.dob && (
+                      {errors.child?.[index]?.dob && (
                         <span className="text-red-700 text-xl-2 font-inter ml-2">
-                          {errors.dob.message}
+                          {errors.child?.[index]?.dob.message}
                         </span>
                       )}
                     </div>
@@ -427,7 +347,11 @@ const ChildRegistration = () => {
                       <div className="grid lg:grid-cols-2 gap-y-6">
                         {ageGroups.map((item) => (
                           <div className="flex gap-2">
-                            <CheckBoxIcon state={item == ageGroup} />
+                            <CheckBoxIcon
+                              state={
+                                item == getValues(`child.${index}.ageGroup`)
+                              }
+                            />
                             <span className="font-inter text-xl-4 text-neutral-800">
                               {item}
                             </span>
@@ -436,18 +360,28 @@ const ChildRegistration = () => {
 
                         <input
                           type="hidden"
-                          {...register("ageGroup")}
+                          {...register(`child.${index}.ageGroup`)}
                           defaultValue={""}
-                          value={calculateAgeGroup(DOB)}
+                          // value={calculateAgeGroup(DOB)
+
+                          // }
                         />
                       </div>
-                      {errors.ageGroup && (
+                      {errors.child?.[index]?.ageGroup && (
                         <span className="text-red-700 text-xl-2 font-inter ml-2">
-                          {errors.ageGroup.message}
+                          {errors.child?.[index]?.ageGroup.message}
                         </span>
                       )}
                     </div>
-                    <Photo />
+                    <div>
+                      <label className="font-inter text-xl-4 text-neutral-800">
+                        Child Passport Photograph{" "}
+                        <span className="font-inter text-xl-4 text-neutral-700">
+                          (Taken in the last six months)
+                        </span>
+                      </label>
+                      <Photo />
+                    </div>
                   </div>
                 </div>
 
@@ -458,22 +392,27 @@ const ChildRegistration = () => {
                     </label>
                     <Controller
                       control={control}
-                      name="relationshipWithChild"
+                      name={`child.${index}.relationshipWithChild`}
                       defaultValue=""
                       render={({ field: { onChange, value } }) => (
                         <Select
                           placeholder="Select Relationship"
                           styles={customStyles}
                           maxMenuHeight={150}
-                          onChange={(option) => onChange(option?.value || "")}
-                          // defaultValue={""}
+                          onChange={(e) => {
+                            setRole(e?.value || null);
+                            setValue(
+                              `child.${index}.relationshipWithChild`,
+                              e?.value!
+                            );
+                          }}
                           options={Guardain}
                         />
                       )}
                     />
-                    {errors.relationshipWithChild && (
+                    {errors.child?.[index]?.relationshipWithChild && (
                       <span className="text-red-700 text-xl-2 font-inter ml-2">
-                        {errors.relationshipWithChild.message}
+                        {errors.child?.[index]?.relationshipWithChild.message}
                       </span>
                     )}
                   </div>
@@ -484,20 +423,29 @@ const ChildRegistration = () => {
                       </label>
                       <Controller
                         control={control}
-                        name="relationshipWithParent"
+                        name={`child.${index}.relationshipWithParent`}
                         render={({ field: { onChange, value } }) => (
                           <Select
                             placeholder="Select Relationship Type"
                             styles={customStyles}
                             maxMenuHeight={150}
-                            onChange={(option) => onChange(option?.value || "")}
+                            onChange={(option) => {
+                              setValue(
+                                `child.${index}.relationshipWithParent`,
+                                option?.value!
+                              );
+                              setSubRole(option?.value || null);
+                            }}
                             options={option}
                           />
                         )}
                       />
-                      {errors.relationshipWithParent && (
+                      {errors.child?.[index]?.relationshipWithParent && (
                         <span className="text-red-700 text-xl-2 font-inter ml-2">
-                          {errors.relationshipWithParent.message}
+                          {
+                            errors.child?.[index]?.relationshipWithParent
+                              .message
+                          }
                         </span>
                       )}
                     </div>
@@ -505,15 +453,18 @@ const ChildRegistration = () => {
                   {role == "guardian" && subRole == "other" && (
                     <div>
                       <input
-                        {...register("other", {
+                        {...register(`child.${index}.other`, {
                           required: "specify a relationship",
                         })}
                         placeholder="Specify relationship"
                         className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 w-full"
                       />
-                      {errors.relationshipWithParent && (
+                      {errors.child?.[index]?.relationshipWithParent && (
                         <span className="text-red-700 text-xl-2 font-inter ml-2">
-                          {errors.relationshipWithParent.message}
+                          {
+                            errors.child?.[index]?.relationshipWithParent
+                              .message
+                          }
                         </span>
                       )}
                     </div>
@@ -521,28 +472,30 @@ const ChildRegistration = () => {
                   <div className="flex flex-col gap-1">
                     <label>Special Need(s)</label>
                     <textarea
-                      {...register("specialNeed")}
+                      {...register(`child.${index}.specialNeed`)}
                       defaultValue={""}
                       name=""
                       id=""
-                      className="rounded border-gray-300 border resize-none scroll-smooth h-[100px]"
+                      className="rounded border-gray-300 border resize-none scroll-smooth h-[100px] p-2 text-sm"
                       placeholder="Provide information on any special type of care that may need to be provided for the child."
                     ></textarea>
                   </div>
-                </div>
-
-                <div className="flex justify-between">
-                  <button className="flex items-center text-red-700 cursor-pointer">
-                    <Plus />
-                    Add another child
-                  </button>
-                  <button type="submit">Save and Proceed</button>
-                  {/* <Button type="submit" >Save and Proceed</Button> */}
                 </div>
               </div>
             }
           </div>
         ))}
+        <div className="flex justify-between">
+          <button
+            className="flex items-center text-red-700 cursor-pointer"
+            onClick={() => handleAppend()}
+          >
+            <Plus />
+            Add another child
+          </button>
+          <button type="submit">Save and Proceed</button>
+          {/* <Button type="submit" >Save and Proceed</Button> */}
+        </div>
       </form>
     </div>
   );

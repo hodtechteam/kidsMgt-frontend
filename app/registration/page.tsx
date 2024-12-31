@@ -6,16 +6,28 @@ import PersonalRegistration from "./personalRegistration";
 import CaregiverRegistration from "./caregiveRegistration";
 import { NavigationContext } from "./context/context";
 import Navigation from "./navigation";
+import { z } from "zod";
+import Image from "next/image";
 
 export default function Registration() {
-  const [userRole, setUserRole] = useState("child");
+  const [userRole, setUserRole] = useState("personal");
   const [activeRoles, setActiveRoles] = useState([]);
-
 
   // useMemo(setActiveRoles({
 
   // }), userRole)
 
+  // .refine(
+  //   (data) =>
+  //     (data.relationshipWithChild === "parent" &&
+  //       ["father", "mother"].includes(data.relationshipWithParent as any)) ||
+  //     (data.relationshipWithChild === "guardian" &&
+  //       GuardianEnums.includes(data.relationshipWithParent as any)),
+  //   {
+  //     message: "Invalid relationship for the selected type",
+  //     path: ["relationshipWithParent"], // Error focus
+  //   }
+  // );
 
   return (
     <div className="flex flex-row h-screen">
@@ -100,11 +112,7 @@ export default function Registration() {
             >
               <div
                 className={`
-                ${
-                  userRole == "child"
-                    ? "border-red-600"
-                    : "border-neutral-600"
-                }
+                ${userRole == "child" ? "border-red-600" : "border-neutral-600"}
               rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center`}
               >
                 <span>2</span>
@@ -118,20 +126,26 @@ export default function Registration() {
             <div
               // className="flex items-center justify-between rounded-full border-neutral-600 border-1 p-2 gap-2"
               className={`
-                ${userRole == "caregiver" ? "flex border-red-600 " : "hidden border-neutral-600"}
+                ${
+                  userRole == "caregiver"
+                    ? "flex border-red-600 "
+                    : "hidden border-neutral-600"
+                }
                 lg:flex
                 items-center 
                 rounded-full border-neutral-600 border-1 p-2 gap-2
                 
               `}
             >
-              <div className={`
+              <div
+                className={`
                 ${
                   userRole == "caregiver"
                     ? "border-red-600"
                     : "border-neutral-600"
                 }
-                    rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center`}>
+                    rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center`}
+              >
                 <span>3</span>
               </div>
 
@@ -147,7 +161,14 @@ export default function Registration() {
         </div>
       </div>
 
-      <div className="bg-gray-900 flex-1 overflow-auto lg:flex-[4] lg:block hidden"></div>
+      <div className="flex-1 overflow-auto lg:flex-[4] lg:block hidden">
+        {/* <Image 
+          src="registration_image.png"
+              layout="fill"
+    objectFit="cover"
+          /> */}
+        <Image src="registration_image.png" layout="fill" objectFit="cover" alt="children" />
+      </div>
     </div>
   );
 }

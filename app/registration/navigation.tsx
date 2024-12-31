@@ -12,7 +12,7 @@ const Navigation = () => {
         case "child":
             return <ChildRegistration/>
         case "caregiver":
-            return <CaregiverRegistration/>
+            return <CaregiverRegistration />
         default:
             return <PersonalRegistration/> 
 

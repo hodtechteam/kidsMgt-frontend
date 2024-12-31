@@ -73,3 +73,108 @@ export const SubDirectories: Record<RoleKey, ISubDirectory[]> = {
       { value: "members_temp", label: "Temporary Member" },
     ],
   };
+
+
+
+  export const countriesSchema = [
+    {
+      value: "nigeria",
+      label: "Nigeria",
+      states: [
+        {
+          value: "lagos",
+          label: "Lagos",
+          lgas: [
+            { value: "ikeja", label: "Ikeja" },
+            { value: "lekki", label: "Lekki" },
+            { value: "surulere", label: "Surulere" },
+            { value: "ajah", label: "Ajah" },
+            { value: "badagry", label: "Badagry" },
+          ],
+        },
+        {
+          value: "abia",
+          label: "Abia",
+          lgas: [
+            { value: "umuahia", label: "Umuahia" },
+            { value: "aba", label: "Aba" },
+            { value: "ohafia", label: "Ohafia" },
+            { value: "osisioma", label: "Osisioma" },
+            { value: "bende", label: "Bende" },
+          ],
+        },
+      ],
+      branches: [
+        { value: "main_branch", label: "Main Branch" },
+        { value: "city_center", label: "City Center" },
+        { value: "rural_outreach", label: "Rural Outreach" },
+      ],
+    },
+    {
+      value: "canada",
+      label: "Canada",
+      states: [
+        {
+          value: "ontario",
+          label: "Ontario",
+          lgas: [
+            { value: "toronto", label: "Toronto" },
+            { value: "ottawa", label: "Ottawa" },
+            { value: "mississauga", label: "Mississauga" },
+            { value: "brampton", label: "Brampton" },
+            { value: "london", label: "London" },
+          ],
+        },
+        {
+          value: "british_columbia",
+          label: "British Columbia",
+          lgas: [
+            { value: "vancouver", label: "Vancouver" },
+            { value: "victoria", label: "Victoria" },
+            { value: "kelowna", label: "Kelowna" },
+            { value: "surrey", label: "Surrey" },
+            { value: "burnaby", label: "Burnaby" },
+          ],
+        },
+      ],
+      branches: [
+        { value: "north_hub", label: "North Hub" },
+        { value: "urban_outreach", label: "Urban Outreach" },
+        { value: "west_community", label: "West Community" },
+      ],
+    },
+    {
+      value: "uk",
+      label: "United Kingdom",
+      states: [
+        {
+          value: "england",
+          label: "England",
+          lgas: [
+            { value: "london", label: "London" },
+            { value: "manchester", label: "Manchester" },
+            { value: "birmingham", label: "Birmingham" },
+            { value: "leeds", label: "Leeds" },
+            { value: "bristol", label: "Bristol" },
+          ],
+        },
+        {
+          value: "scotland",
+          label: "Scotland",
+          lgas: [
+            { value: "edinburgh", label: "Edinburgh" },
+            { value: "glasgow", label: "Glasgow" },
+            { value: "aberdeen", label: "Aberdeen" },
+            { value: "dundee", label: "Dundee" },
+            { value: "inverness", label: "Inverness" },
+          ],
+        },
+      ],
+      branches: [
+        { value: "east_hub", label: "East Hub" },
+        { value: "city_outreach", label: "City Outreach" },
+        { value: "south_community", label: "South Community" },
+      ],
+    },
+  ];
+  
