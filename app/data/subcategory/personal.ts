@@ -4,6 +4,44 @@ export interface ISubDirectory{
     value:string;
     label:string;
 }
+
+export const roles = [
+  { value: "pastors", label: "Pastors" },
+  { value: "directors", label: "Directors" },
+  { value: "hod", label: "HOD" },
+  { value: "deputy_hods", label: "Deputy HODs" },
+  { value: "colony_leaders", label: "Colony Leaders" },
+  { value: "captains", label: "Captains" },
+  { value: "workers", label: "Workers" },
+  { value: "members", label: "Members" },
+];
+
+export const identificationOptions = [
+  { value: "nin", label: "National Identification Number (NIN)" },
+  { value: "passport", label: "Passport" },
+  { value: "drivers_license", label: "Driver's License" },
+  { value: "voters_card", label: "Voter's Card" },
+];
+
+export const Guardain = [
+  { value: "parent", label: "Parent" },
+  { value: "guardian", label: "Gaurdian" },
+];
+
+export const ParentOptions = [
+  { value: "father", label: "Father" },
+  { value: "mother", label: "Mother" },
+];
+
+export const GuardianOptions = [
+  { value: "brother", label: "Brother" },
+  { value: "sister", label: "Sister" },
+  { value: "aunty", label: "Aunty" },
+  { value: "uncle", label: "Uncle" },
+  { value: "other", label: "Other" },
+];
+
+
 export const SubDirectories: Record<RoleKey, ISubDirectory[]> = {
     pastors: [
         { value: "evangelism_and_mission", label: "Evangelism and Mission" },

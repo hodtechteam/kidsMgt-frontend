@@ -1,274 +1,439 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {zodResolver} from "@hookform/resolvers/zod"
-import Link from "next/link";
-import { useState } from "react";
-import Select, { StylesConfig } from "react-select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { useContext, useState, useEffect } from "react";
+import Select, { SingleValue, StylesConfig } from "react-select";
 import Photo from "../components/photo";
 import Plus from "../svg/plus";
+import { caregiverArraySchemaType, careGiverSchema, Userschema } from "./schema";
+import { Trash } from "../svg/trash";
+import { ArrowUp } from "../svg/arrowUp";
+import { ArrowDown } from "../svg/arrowDown";
+import Identification from "../components/identification";
+import {
+  Guardain,
+  GuardianOptions,
+  identificationOptions,
+  ISubDirectory,
+  ParentOptions,
+  RoleKey,
+  roles,
+  SubDirectories,
+} from "../data/subcategory/personal";
+import { NavigationContext } from "./context/context";
 const CaregiverRegistration = () => {
-    const [step, setStep] = useState(0);
-    const [role, setRole] = useState<string | undefined>("");
-    const [userRole] = useState("personal");
-    const [inputFocused, setInputFocued] = useState(false);
-    const customStyles: StylesConfig<{ value: string; label: string }, false> = {
-      control: () => ({
-        display: "flex",
-        width: "100%",
-        padding: "16px 12px 16px 12px",
-        textSize: "16px",
-        border: "1px solid #E4E5E7",
-        borderRadius: "4px",
-      }),
-    };
-  
-    const roles = [
-      { value: "pastors", label: "Pastors" },
-      { value: "directors", label: "Directors" },
-      { value: "hod", label: "HOD" },
-      { value: "deputy_hods", label: "Deputy HODs" },
-      { value: "colony_leaders", label: "Colony Leaders" },
-      { value: "captains", label: "Captains" },
-      { value: "workers", label: "Workers" },
-      { value: "members", label: "Members" },
-    ];
-  
-    const ministryOptions = [
-      { value: "evangelism_and_mission", label: "Evangelism and Mission" },
-      { value: "small_groups", label: "Small Groups" },
-      { value: "worship_and_communications", label: "Worship & Communications" },
-      { value: "assimilation", label: "Assimilation" },
-      { value: "fellowship", label: "Fellowship" },
-      { value: "hod_academy", label: "HOD Academy" },
-      { value: "prayer", label: "Prayer" },
-      { value: "stewardship", label: "Stewardship" },
-      { value: "head_of_ministries", label: "Head of Ministries" },
-    ];
+  const [role, setRole] = useState<string | undefined>("");
+  const [subRole, setSubRole] = useState<string | undefined>("");
 
-    // const {register, handleChange} = useform
+  const [dutyRole, setDutyRole] = useState<string | undefined>("");
+  const [subDutyRole, setDutySubRole] = useState<ISubDirectory[] | []>([]);
+  const [identification, setIdentification] = useState<string | undefined>(
+    undefined
+  );
+   const context = useContext(NavigationContext);
+
+  const defaultValue = {
+    firstName: "",
+    lastName: "",
+    gender: undefined,
+    roleInChurch: "",
+    roleType: "",
+    relationshipWithChild: "",
+    relationshipWithParent: "",
+    other: "",
+    identificationType: "",
+  };
+
+  const {
+    register,
+    control,
+    getValues,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<caregiverArraySchemaType>({
+    resolver: zodResolver(Userschema),
+    defaultValues: {
+      caregiver: [defaultValue],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    name: "caregiver",
+    control,
+  });
+
+  const [id, setId] = useState(0);
+
+  const customStyles: StylesConfig<{ value: string; label: string }, false> = {
+    control: () => ({
+      display: "flex",
+      width: "100%",
+      padding: "10px",
+      textSize: "14px",
+      border: "1px solid #E4E5E7",
+      borderRadius: "4px",
+    }),
+  };
+  const inputStyles: StylesConfig<{ value: string; label: string }, false> = {
+    control: () => ({
+      display: "flex",
+      width: "100%",
+      padding: "10px",
+      fontWeight: 400,
+      fontSize: "14px",
+      fontFamily: "'Inter', sans-serif",
+      borderWidth: "1px",
+      borderRadius: "0.25rem",
+      borderColor: "#E5E7EB",
+    }),
+  };
+  const HandleRoleChange = (
+    selectedOption: SingleValue<ISubDirectory>,
+    onChange: (param: string) => void
+  ) => {
+    const selectedRole = selectedOption?.value as RoleKey;
+
+    onChange(selectedRole);
+    // setValue(`caregiver.${index}.roleInChurch`, selectedRole);
+    setDutyRole(selectedRole);
+    setDutySubRole(SubDirectories[selectedRole as RoleKey] || []);
+  };
+
+  const onSubmit = (data: caregiverArraySchemaType) => {
+    const payload = {
+      caregiver: data
+  }
+  if (!localStorage.getItem("payload")) {
+    // localStorage.setItem("payload", JSON.stringify(payload));
+  } else {
+    const localData = localStorage.getItem("payload")
+    const savedData = localData ? JSON.parse(localData) : {};
+    localStorage.setItem("payload", JSON.stringify({...savedData, ...payload}));
+  }
+  };
+
+  const handleAppend = () => {
+    const currentFieldValue = getValues(`caregiver.${fields.length - 1}`);
+    try {
+      careGiverSchema.parse(currentFieldValue);
+      append(defaultValue);
+    } catch (error) {
+      console.log("validation error", error, "errors", errors);
+    }
+  };
+
+  useEffect(() => {
+    setId(fields.length - 1);
+    console.log("Fields updated:", fields, "id", fields.length - 1);
+  }, [fields]);
+
+  let option: { value: string; label: string }[] = [];
+
+  if (role && role == "parent") option = ParentOptions;
+  if (role && role == "guardian") option = GuardianOptions;
   return (
-    <div className="mt-4">
-    <p className="text-primary-main-500 text-xl-4.5 pt-2.5 pb-4 font-semibold">
-      Personal Information
-    </p>
+    <div className="mt-4 relative">
+      <button onClick={() => context?.setUserRole("child")}>Back</button>
+      <p className="text-primary-main-500 text-xl-4.5 pt-2.5 pb-4 font-semibold">
+        caregiver Information
+      </p>
 
-    <hr />
+      <hr />
+      <form
+        className="flex flex-col gap-6 mt-6"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        {fields.map((field, index) => (
+          <div key={field.id}>
+            {fields.length > 1 && (
+              <div className="flex items-center justify-between">
+                <span>{`Caretaker ${index}
+                   ${
+                     index < fields.length - 1
+                       ? `(
+                  ${getValues(`caregiver.${index}.firstName`)} ${getValues(
+                           `caregiver.${index}.lastName`
+                         )}
+                   )`
+                       : ""
+                   }
+                  
+                  `}</span>
 
-    <p className="mt-6 mb-4 font-neutral-700 font-inter font-semibold text-xl-4.5">
-      Basic Details
-    </p>
-    <form className="flex flex-col gap-6">
-      {step == 0 && (
-        <div className="flex flex-col gap-6">
-          <div className="lg:flex lg:gap-6 lg:items-center">
-            <div className="lg:w-1/2 gap-2 flex flex-col">
-              <label className="text-xl-4 font-normal font-inter text-neutral-800">
-                First Name
-              </label>
-              <input
-                placeholder="Enter first name"
-                className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
-              />
-            </div>
-            <div className="lg:w-1/2 gap-2 flex flex-col">
-              <label className="text-xl-4 font-normal font-inter text-neutral-800">
-                Last Name
-              </label>
-              <input
-                placeholder="Enter last name"
-                className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-xl-4 font-normal font-inter text-neutral-800">
-              Email
-            </label>
-            <input
-              placeholder="Enter email"
-              type="email"
-              className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
-            />
-          </div>
-
-          <div>
-            <p className="text-xl-4 text-neutral-800 font-inter font-normal">
-              Gender
-            </p>
-            <div className="flex">
-              <div className="flex flex-row-reverse justify-end w-1/2 items-center gap-2">
-                <label className="text-xl-4 font-normal font-inter text-neutral-800">
-                  Male
-                </label>
-                <Input
-                  type="radio"
-                  className="h-6 w-6 rounded border-1 border-grey-300"
-                />
+                <div className="flex items-center">
+                  <Trash onClick={() => remove(index)} />
+                  <div onClick={() => setId(index)}>
+                    {index == id ? <ArrowUp /> : <ArrowDown />}
+                  </div>
+                </div>
               </div>
+            )}
 
-              <div className="flex flex-row-reverse items-center justify-end w-1/2 gap-2">
-                <label className="text-xl-4 font-normal font-inter text-neutral-800">
-                  Female
-                </label>
-                <Input
-                  type="radio"
-                  className="h-6 w-6 rounded border-1 border-grey-300"
-                />
-              </div>
-            </div>
-          </div>
+            {
+              <div
+                className={`${index == id ? "flex flex-col gap-6" : "hidden"}`}
+              >
+                <div className="lg:flex lg:gap-6 lg:items-center">
+                  <div className="lg:w-1/2 gap-2 flex flex-col">
+                    <label className="text-xl-4 font-normal font-inter text-neutral-800">
+                      First Name
+                    </label>
+                    <input
+                      {...register(`caregiver.${index}.firstName`)}
+                      placeholder="Enter first name"
+                      className="py-3 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
+                    />
+                    {errors.caregiver?.[index]?.firstName && (
+                      <span className="text-red-700 text-xl-2 font-inter ml-2">
+                        {errors.caregiver?.[index]?.firstName.message}
+                      </span>
+                    )}
+                  </div>
+                  <div className="lg:w-1/2 gap-2 flex flex-col">
+                    <label className="text-xl-4 font-normal font-inter text-neutral-800">
+                      Last Name
+                    </label>
+                    <input
+                      {...register(`caregiver.${index}.lastName`)}
+                      defaultValue={""}
+                      placeholder="Enter last name"
+                      className="py-3 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
+                    />
+                    {errors.caregiver?.[index]?.lastName && (
+                      <span className="text-red-700 text-xl-2 font-inter ml-2">
+                        {errors.caregiver?.[index]?.lastName.message}
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-          <label className="text-xl-4 text-neutral-800 font-inter font-normal">
-            Phone Number
-          </label>
-          <div className="flex lg:gap-6 gap-3">
-            <div className="lg:w-1/5 w-20">
-              <select className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 appearance-none">
-                <option className="text-black">+234</option>
-              </select>
-            </div>
-            <div className="lg:w-4/5 w-full flex relative">
-              <input
-                placeholder="9173535098"
-                className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 "
-                onFocus={() => setInputFocued(true)}
-              />
-              <span className="absolute top-1/2 right-3 -translate-y-1/2 text-primary-main-500 text-right font-inter text-xl-4 underline decoration-solid decoration-auto underline-offset-autoF">
-                VERIFY
-              </span>
-            </div>
-          </div>
-          {
-              inputFocused && (
-                <div className="flex items-center gap-1">
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 18 18"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M9 16.5C13.125 16.5 16.5 13.125 16.5 9C16.5 4.875 13.125 1.5 9 1.5C4.875 1.5 1.5 4.875 1.5 9C1.5 13.125 4.875 16.5 9 16.5Z"
-                    stroke="#E08701"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M9 6V9.75"
-                    stroke="#E08701"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M8.99609 12H9.00283"
-                    stroke="#E08701"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <div>
+                  <p className="text-xl-4 text-neutral-800 font-inter font-normal">
+                    Gender
+                  </p>
+                  <div className="flex">
+                    <div className="flex flex-row-reverse justify-end w-1/2 items-center gap-2">
+                      <label className="text-xl-4 font-normal font-inter text-neutral-800">
+                        Male
+                      </label>
+                      <input
+                        type="radio"
+                        value="male"
+                        className="h-6 w-6 rounded border-1 border-grey-300"
+                        {...register(`caregiver.${index}.gender`)}
+                        defaultValue={""}
+                      />
+                    </div>
 
-                <p className="font-inter text-xl-3 text-[#E08701]">
-                  Phone number verification is compulsory. Kindly click on
-                  the “VERIFY” button
+                    <div className="flex flex-row-reverse items-center justify-end w-1/2 gap-2">
+                      <label className="text-xl-4 font-normal font-inter text-neutral-800">
+                        Female
+                      </label>
+                      <input
+                        type="radio"
+                        value="female"
+                        className="h-6 w-6 rounded border-1 border-grey-300"
+                        {...register(`caregiver.${index}.gender`)}
+                        defaultValue={""}
+                      />
+                    </div>
+                  </div>
+                  {errors.caregiver?.[index]?.gender && (
+                    <span className="text-red-700 text-xl-2 font-inter ml-2">
+                      {errors.caregiver?.[index]?.gender.message}
+                    </span>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xl-4 text-neutral-800 font-inter font-normal">
+                    Role in Church
+                  </label>
+                  <Controller
+                    control={control}
+                    name={`caregiver.${index}.roleInChurch`}
+                    render={({ field: { onChange } }) => (
+                      <Select
+                        styles={customStyles}
+                        maxMenuHeight={150}
+                        onChange={(option) =>
+                          HandleRoleChange(option, onChange)
+                        }
+                        options={roles}
+                      />
+                    )}
+                  />
+                  {errors.caregiver?.[index]?.roleInChurch && (
+                    <span className="text-red-700 text-xl-2 font-inter ml-2">
+                      {errors.caregiver?.[index]?.roleInChurch.message}
+                    </span>
+                  )}
+                </div>
+                {dutyRole != "" && (
+                  <div>
+                    <label className="text-xl-4 text-neutral-800 font-inter font-normal">
+                      Role Type
+                    </label>
+                    <Controller
+                      control={control}
+                      name={`caregiver.${index}.roleType`}
+                      defaultValue=""
+                      render={({ field: { onChange } }) => (
+                        <Select
+                          styles={customStyles}
+                          onChange={(option) => {
+                            onChange(option?.value);
+                          }}
+                          maxMenuHeight={150}
+                          options={subDutyRole}
+                        />
+                      )}
+                    />
+                    {errors.caregiver?.[index]?.roleType && (
+                      <span className="text-red-700 text-xl-2 font-inter ml-2">
+                        {errors.caregiver?.[index]?.roleType.message}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-xl-4 text-neutral-800 font-inter font-normal">
+                    Relationship with child
+                  </label>
+                  <Controller
+                    control={control}
+                    name={`caregiver.${index}.relationshipWithChild`}
+                    render={({ field: { onChange } }) => (
+                      <Select
+                        placeholder="Select Relationship"
+                        styles={customStyles}
+                        maxMenuHeight={150}
+                        onChange={(e) => {
+                          onChange(e?.value);
+                          setRole(e?.value);
+                        }}
+                        options={Guardain}
+                      />
+                    )}
+                  />
+                  {errors.caregiver?.[index]?.relationshipWithChild && (
+                    <span className="text-red-700 text-xl-2 font-inter ml-2">
+                      {errors.caregiver?.[index]?.relationshipWithChild.message}
+                    </span>
+                  )}
+                </div>
+                {role && (
+                  <div>
+                    <label className="text-xl-4 text-neutral-800 font-inter font-normal">
+                      Relationship Type
+                    </label>
+                    <Controller
+                      control={control}
+                      name={`caregiver.${index}.relationshipWithParent`}
+                      render={({ field: { onChange } }) => (
+                        <Select
+                          placeholder="Select Relationship Type"
+                          styles={customStyles}
+                          maxMenuHeight={150}
+                          onChange={(option) => {
+                            onChange(option?.value);
+                            setSubRole(option?.value);
+                          }}
+                          options={option}
+                        />
+                      )}
+                    />
+                    {errors.caregiver?.[index]?.relationshipWithParent && (
+                      <span className="text-red-700 text-xl-2 font-inter ml-2">
+                        {
+                          errors.caregiver?.[index]?.relationshipWithParent
+                            .message
+                        }
+                      </span>
+                    )}
+                  </div>
+                )}
+                {role == "guardian" && subRole == "other" && (
+                  <div>
+                    <input
+                      {...register(`caregiver.${index}.other`, {
+                        required: "specify a relationship",
+                      })}
+                      placeholder="Specify relationship"
+                      className="py-3 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 w-full"
+                    />
+                    {errors.caregiver?.[index]?.relationshipWithParent && (
+                      <span className="text-red-700 text-xl-2 font-inter ml-2">
+                        {
+                          errors.caregiver?.[index]?.relationshipWithParent
+                            .message
+                        }
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <p className="text-xl-4 text-neutral-800 font-inter font-normal mt-4">
+                  Means Of Identification
                 </p>
+                <div className="w-full">
+                  <label className="text-xl-4 text-neutral-800 font-inter font-normal">
+                    Identification Type
+                  </label>
+                  <Controller
+                    control={control}
+                    name={`caregiver.${index}.identificationType`}
+                    defaultValue=""
+                    render={({ field: { onChange } }) => (
+                      <Select
+                        styles={inputStyles}
+                        placeholder="Enter Identification Type"
+                        onChange={(option) => {
+                          setIdentification(option?.value);
+                          onChange(option?.value);
+                        }}
+                        maxMenuHeight={150}
+                        options={identificationOptions}
+                      />
+                    )}
+                  />
+                  {errors.caregiver?.[index]?.identificationType && (
+                    <span className="text-red-700 text-xl-2 font-inter ml-2">
+                      {errors.caregiver?.[index]?.identificationType.message}
+                    </span>
+                  )}
+                </div>
+                {identification && (
+                  <Identification identification={identification} />
+                )}
+
+                <div>
+                  <label className="font-inter text-xl-4 text-neutral-800">
+                    CareGiver Passport Photograph{" "}
+                    <span className="font-inter text-xl-4 text-neutral-700">
+                      (Taken in the last six months)
+                    </span>
+                  </label>
+                  <Photo />
+                </div>
               </div>
-              )
             }
-        </div>
-      )}
-
-      {step == 1 && (
-        <div className="flex flex-col gap-6">
-          <div>
-            <label className="text-xl-4 text-neutral-800 font-inter font-normal">
-              Relationship with child
-            </label>
-            <Select
-              styles={customStyles}
-              maxMenuHeight={150}
-              onChange={(option) => setRole(option?.value)}
-              options={roles}
-            />
           </div>
-          {role != "" && (
-            <div>
-              <label className="text-xl-4 text-neutral-800 font-inter font-normal">
-                Rolationship with parent
-              </label>
-
-              <Select
-                styles={customStyles}
-                maxMenuHeight={150}
-                options={ministryOptions}
-              />
-            </div>
-          )}
-          <Photo/>
-        </div>
-      )}
-      {step == 2 && (
-        <div className="flex flex-col gap-9">
-          <p className="text-xl-4 text-neutral-800 font-inter font-normal">
-            Means Of Identification
-          </p>
-          <div className="w-full">
-            <label className="text-xl-4 text-neutral-800 font-inter font-normal">
-              Identification Type
-            </label>
-            <select className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200">
-              <option disabled>Select Identification Type</option>
-            </select>
-          </div>
-        </div>
-      )}
-
-      <div className="flex justify-between">
-        {step > 0 && (
-          <Button
-            onClick={(event) => {
-              event.preventDefault();
-              setStep((prev) => prev - 1);
-            }}
+        ))}
+        <div className="flex justify-between">
+          <button
+            className="flex items-center text-red-700 cursor-pointer"
+            onClick={() => handleAppend()}
           >
-            Previous
-          </Button>
-        )}
+            <Plus />
+            Add another caregiver
+          </button>
+          <button type="submit">Save and Proceed</button>
+        </div>
+      </form>
+    </div>
+  );
+};
 
-        {step < 3 && (
-          <Button
-            onClick={(event) => {
-              event.preventDefault();
-              setStep((next) => next + 1);
-            }}
-            className={`${step == 0 ? "ml-auto" : ""}`}
-          >
-            Next
-          </Button>
-        )}
-
-        {step == 3 && 
-        <p className="relative">
-            <Plus/>
-            A another caregiver
-        </p>
-        
-        }
-
-        {step == 3 && 
-        <Button type="submit">Save and Proceed</Button>
-        
-        }
-      </div>
-    </form>
-  </div>
-
-  )
-}
-
-export default CaregiverRegistration
+export default CaregiverRegistration;

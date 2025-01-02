@@ -1,0 +1,44 @@
+
+// {
+
+  
+    // "rules": {
+    //   "no-unused-vars": ["error", { "vars": "all", "args": "after-used", "ignoreRestSiblings": true }]
+    // },
+    // "plugins": ["no-unused-imports"],
+  //   "rules": {
+  //     "unused-imports/no-unused-imports": "error"
+  // },
+//   "rules": {
+//     "no-unused-vars": "off",
+//     "unused-imports/no-unused-imports": "error",
+//     "unused-imports/no-unused-vars": [
+//       "warn",
+//       {
+//         "vars": "all",
+//         "varsIgnorePattern": "^_",
+//         "args": "after-used",
+//         "argsIgnorePattern": "^_"
+//       }
+//     ]
+//   },
+//   "plugins": ["unused-imports"],
+//   "extends": ["next/core-web-vitals", "next/typescript"]
+// }
+{
+  "rules": {
+    "no-unused-vars": "off", // Disabled since you are using the plugin
+    "unused-imports/no-unused-imports": "error", // Error level for unused imports
+    "unused-imports/no-unused-vars": [
+      "error", // Change to "error" to enforce
+      {
+        "vars": "all", // Enforce on all variables
+        "varsIgnorePattern": "^_", // Ignore variables starting with "_"
+        "args": "after-used", // Enforce rule on arguments after they're used
+        "argsIgnorePattern": "^_" // Ignore unused arguments starting with "_"
+      }
+    ]
+  },
+  "plugins": ["unused-imports"],
+  "extends": ["next/core-web-vitals", "next/typescript"]
+}

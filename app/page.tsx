@@ -5,11 +5,21 @@ const Home = () => {
   return (
     <div className="flex items-center justify-center lg:h-screen font-inter">
       <div className=" text-center ">
-        <h2 className="text-primary-dark-900 text-xl-8 font-bold">You are a...</h2>
-        <p className="text-xl-4 font-meduim text-neutral-700">Select the option that you belong to</p>
+        <h2 className="text-primary-dark-900 text-xl-8 font-bold">
+          You are a...
+        </h2>
+        <p className="text-xl-4 font-meduim text-neutral-700">
+          Select the option that you belong to
+        </p>
 
         <div className="flex lg:flex-row flex-col lg:gap-x-8 gap-y-8 lg:m-14 m-6 justify-center items-center">
-          <Link href="/registration" className="rounded  active:border-blue-600 focus:border-blue-600 border-neutral-200 border-1 flex flex-col justify-center items-center px-6 py-8">
+          <Link
+            href={{
+              pathname: "/registration",
+              query: { type: "member" },
+            }}
+            className="rounded  active:border-blue-600 focus:border-blue-600 border-neutral-200 border-1 flex flex-col justify-center items-center px-6 py-8"
+          >
             <div className="rounded-lg border-primary-200 border-2 p-5">
               <svg
                 width="56"
@@ -34,38 +44,52 @@ const Home = () => {
               </svg>
             </div>
 
-            <p className="text-xl-4.5 text-neutral-800 font-bold mt-6">Member/First Timer</p>
-            <p className="mt-3 text-xl-3 leading-20px break-words ">An HOD member or would like to be an HOD member </p>
+            <p className="text-xl-4.5 text-neutral-800 font-bold mt-6">
+              Member/First Timer
+            </p>
+            <p className="mt-3 text-xl-3 leading-20px break-words ">
+              An HOD member or would like to be an HOD member{" "}
+            </p>
           </Link>
 
-          <div className="rounded-lg active:border-blue-600 focus:border-blue-600 border-neutral-200 border-1 flex flex-col justify-center items-center px-6 py-8">
-            <div className="rounded-lg border-primary-200 border-2 p-5">
-              <svg
-                width="56"
-                height="56"
-                viewBox="0 0 56 56"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M28.4999 28C34.9432 28 40.1666 22.7767 40.1666 16.3333C40.1666 9.89002 34.9432 4.66667 28.4999 4.66667C22.0566 4.66667 16.8333 9.89002 16.8333 16.3333C16.8333 22.7767 22.0566 28 28.4999 28Z"
-                  fill="#6A6AC8"
-                />
-                <path
-                  opacity="0.4"
-                  d="M28.5001 33.8333C16.8101 33.8333 7.29004 41.6733 7.29004 51.3333C7.29004 51.9867 7.80337 52.5 8.45671 52.5H48.5435C49.1968 52.5 49.7102 51.9867 49.7102 51.3333C49.7102 41.6733 40.1901 33.8333 28.5001 33.8333Z"
-                  fill="#273472"
-                />
-                <path
-                  d="M50.5033 34.3934C48.4033 32.2934 46.7467 32.97 45.3234 34.3934L37.0633 42.6535C36.7366 42.9801 36.4333 43.5867 36.3633 44.0301L35.92 47.18C35.7567 48.3233 36.55 49.1167 37.6933 48.9534L40.8433 48.51C41.2866 48.44 41.9167 48.1367 42.22 47.81L50.48 39.5501C51.9266 38.1501 52.6033 36.4934 50.5033 34.3934Z"
-                  fill="#1A1648"
-                />
-              </svg>
-            </div>
+          <Link
+              href={{
+                pathname: "/registration",
+                query: { type: "visitor" },
+              }}
+            className="rounded-lg active:border-blue-600 focus:border-blue-600 border-neutral-200 border-1 flex flex-col justify-center items-center px-6 py-8">
 
-            <p className="text-[18px] text-neutral-800 font-bold mt-6">Visitor</p>
-            <p className="mt-3 text-xl-3 leading-20">I am not an HOD member and don&apost intend to be one</p>
-          </div>
+              <div className="rounded-lg border-primary-200 border-2 p-5">
+                <svg
+                  width="56"
+                  height="56"
+                  viewBox="0 0 56 56"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M28.4999 28C34.9432 28 40.1666 22.7767 40.1666 16.3333C40.1666 9.89002 34.9432 4.66667 28.4999 4.66667C22.0566 4.66667 16.8333 9.89002 16.8333 16.3333C16.8333 22.7767 22.0566 28 28.4999 28Z"
+                    fill="#6A6AC8"
+                  />
+                  <path
+                    opacity="0.4"
+                    d="M28.5001 33.8333C16.8101 33.8333 7.29004 41.6733 7.29004 51.3333C7.29004 51.9867 7.80337 52.5 8.45671 52.5H48.5435C49.1968 52.5 49.7102 51.9867 49.7102 51.3333C49.7102 41.6733 40.1901 33.8333 28.5001 33.8333Z"
+                    fill="#273472"
+                  />
+                  <path
+                    d="M50.5033 34.3934C48.4033 32.2934 46.7467 32.97 45.3234 34.3934L37.0633 42.6535C36.7366 42.9801 36.4333 43.5867 36.3633 44.0301L35.92 47.18C35.7567 48.3233 36.55 49.1167 37.6933 48.9534L40.8433 48.51C41.2866 48.44 41.9167 48.1367 42.22 47.81L50.48 39.5501C51.9266 38.1501 52.6033 36.4934 50.5033 34.3934Z"
+                    fill="#1A1648"
+                  />
+                </svg>
+              </div>
+
+              <p className="text-[18px] text-neutral-800 font-bold mt-6">
+                Visitor
+              </p>
+              <p className="mt-3 text-xl-3 leading-20">
+                I am not an HOD member and don&apost intend to be one
+              </p>
+            </Link>
         </div>
       </div>
     </div>

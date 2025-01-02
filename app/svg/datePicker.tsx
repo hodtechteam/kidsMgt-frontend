@@ -1,6 +1,8 @@
+interface DatePickerIconProps {
+  toggleDatePicker: () => void; // A function that takes no arguments and returns void
+}
 
-
-export const DatePickerIcon = ({toggleDatePicker}:any) => (
+export const DatePickerIcon = ({toggleDatePicker}: DatePickerIconProps) => (
     <svg
     width="24"
     height="24"

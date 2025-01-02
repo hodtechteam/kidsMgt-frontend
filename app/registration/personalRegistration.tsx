@@ -1,55 +1,66 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import Link from "next/link";
-import { useContext, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { useContext, useEffect, useState } from "react";
 import Select, { SingleValue, StylesConfig } from "react-select";
-import { IPersonalForm, personalForm } from "../data/information/personal";
 import { NavigationContext } from "./context/context";
 import { NotificationIcon } from "../svg/notification";
 import {
   countriesSchema,
+  Guardain,
+  GuardianOptions,
+  identificationOptions,
   ISubDirectory,
+  ParentOptions,
   RoleKey,
+  roles,
   SubDirectories,
 } from "../data/subcategory/personal";
-import { FormSchemaType, Userschema } from "./schema";
+import { personalSchema, PersonalSchemaType } from "./schema";
 import Identification from "../components/identification";
-const PersonalRegistration = ({ schema }: any) => {
+const PersonalRegistration = ({ type }: { type: string }) => {
   const [step, setStep] = useState(0);
   const [role, setRole] = useState<string | undefined>("");
-  const [subRole, setSubRole] = useState<ISubDirectory[] | []>([]);
+  const [subRole, setSubRole] = useState<string | undefined>("");
 
+  const [dutyRole, setDutyRole] = useState<string | undefined>("");
+  const [subDutyRole, setDutySubRole] = useState<ISubDirectory[] | []>([]);
+
+  // localStorage.clear()
   const [selectedCountry, setSelectedCountry] = useState<string | undefined>(
     undefined
   );
   const [selectedState, setSelectedState] = useState<string | undefined>(
     undefined
   );
-  const [selectedSubRole, setSelectedSubRole] = useState<string | undefined>(
-    ""
-  );
   const [identification, setIdentification] = useState<string | undefined>(
     undefined
   );
-  // const [personalInformation, setPersonalInformation] = useState({
-  //   firstName: "",
-  //   lastName: "",
-  //   gender: undefined, // Assuming `gender` is defined elsewhere, like an enum or a string
-  //   email: "",
-  //   roleInChurch: "",
-  //   roleInType: "",
-  //   streetAddress: "",
-  //   country: "",
-  //   state: "",
-  //   lga: "",
-  //   location: "",
-  //   branch: "",
-  //   identificationType: "",
-  // });
+
+  const defaultValue = {
+    firstName: "",
+    lastName: "",
+    gender: undefined,
+    email: "",
+    roleInChurch: "",
+    roleType: "",
+    streetAddress: "",
+    country: "",
+    state: "",
+    lga: "",
+    branch: "",
+    identificationType: "",
+  };
+
   const context = useContext(NavigationContext);
+  const localData = localStorage.getItem("payload");
+  const savedData = localData ? JSON.parse(localData)["personal"] : defaultValue;
+
+
+
+
+
 
   const [inputFocused, setInputFocued] = useState(false);
   const customStyles: StylesConfig<{ value: string; label: string }, false> = {
@@ -80,23 +91,34 @@ const PersonalRegistration = ({ schema }: any) => {
     }),
   };
 
-  const roles = [
-    { value: "pastors", label: "Pastors" },
-    { value: "directors", label: "Directors" },
-    { value: "hod", label: "HOD" },
-    { value: "deputy_hods", label: "Deputy HODs" },
-    { value: "colony_leaders", label: "Colony Leaders" },
-    { value: "captains", label: "Captains" },
-    { value: "workers", label: "Workers" },
-    { value: "members", label: "Members" },
-  ];
+  const {
+    register,
+    control,
+    handleSubmit,
+    getValues,
+    formState: { errors },
+  } = useForm<PersonalSchemaType>({
+    resolver: zodResolver(personalSchema),
+    defaultValues: savedData,
+  });
 
-  const identificationOptions = [
-    { value: "nin", label: "National Identification Number (NIN)" },
-    { value: "passport", label: "Passport" },
-    { value: "drivers_license", label: "Driver's License" },
-    { value: "voters_card", label: "Voter's Card" },
-  ];
+  useEffect(()=> {
+    const selectedRole = getValues("roleInChurch");
+    setDutyRole(selectedRole);
+    setDutySubRole(SubDirectories[selectedRole as RoleKey] || []);
+
+    setRole(getValues("relationshipWithChild"));
+    const defaultCountry = getValues("country");
+    setSelectedCountry(defaultCountry);
+
+    const defaultState = getValues("state");
+    setSelectedState(defaultState);
+  }, [getValues])
+
+  let option: { value: string; label: string }[] = [];
+
+  if (role && role == "parent") option = ParentOptions;
+  if (role && role == "guardian") option = GuardianOptions;
 
   const BranchOptions = countriesSchema.find(
     (item) => item.value == selectedCountry
@@ -112,82 +134,39 @@ const PersonalRegistration = ({ schema }: any) => {
   )?.states;
   const lga = state?.find((item) => item.value == selectedState)?.lgas;
 
-  const HandleRoleChange = (selectedOption: SingleValue<ISubDirectory>) => {
+  const HandleRoleChange = (
+    selectedOption: SingleValue<ISubDirectory>,
+    onChange: (param: string) => void
+  ) => {
     const selectedRole = selectedOption?.value as RoleKey;
 
-    setRole(selectedRole);
-    setSubRole(SubDirectories[selectedRole as RoleKey] || []);
-    setValue("personal.roleInChurch", selectedRole);
+    onChange(selectedRole);
+    setDutyRole(selectedRole);
+    setDutySubRole(SubDirectories[selectedRole as RoleKey] || []);
   };
-
-  // const ministryOptions = [
-  //   { value: "evangelism_and_mission", label: "Evangelism and Mission" },
-  //   { value: "small_groups", label: "Small Groups" },
-  //   { value: "worship_and_communications", label: "Worship & Communications" },
-  //   { value: "assimilation", label: "Assimilation" },
-  //   { value: "fellowship", label: "Fellowship" },
-  //   { value: "hod_academy", label: "HOD Academy" },
-  //   { value: "prayer", label: "Prayer" },
-  //   { value: "stewardship", label: "Stewardship" },
-  //   { value: "head_of_ministries", label: "Head of Ministries" },
-  // ];
-  const defaultValue = {
-    firstName: "",
-    lastName: "",
-    gender: undefined, // No default value for enums; it starts empty here
-    email: "",
-    roleInChurch: "",
-    roleType: "",
-    streetAddress: "",
-    country: "",
-    state: "",
-    lga: "",
-    location: "",
-    branch: "",
-    identificationType: "",
-  };
-
-  const {
-    register,
-    control,
-    setValue,
-    getValues,
-    watch,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormSchemaType>({
-    resolver: zodResolver(Userschema),
-    defaultValues: {
-      personal: defaultValue,
-    },
-  });
-
-  const personal = watch("personal");
-
-  console.log("personal", personal);
-
-  // const Validate = () => {
-  //   const currentFieldValue = getValues(`personal`);
-  //   try {
-  //     personalForm.parse(currentFieldValue);
-  //   } catch (error) {
-  //     console.log("validation error", error, "errors", errors);
-  //   }
-  // };
-
-  const onSubmit = (data: any) => {
+  
+  const onSubmit = (data: PersonalSchemaType) => {
     console.log("in here");
     console.log("data", data);
-    const currentFieldValue = getValues(`personal`);
+
     try {
-      personalForm.parse(currentFieldValue);
-      context?.setUserRole("child")
+      const payload = {
+        personal: data,
+      };
+
+      const localData = localStorage.getItem("payload");
+      const savedData = localData ? JSON.parse(localData) : {};
+      localStorage.setItem(
+        "payload",
+        JSON.stringify({ ...savedData, ...payload })
+      );
+      
+      context?.setUserRole("child");
     } catch (error) {
       console.log("validation error", error, "errors", errors);
     }
   };
 
-  // const submitForm: SubmitHandler<IPersonalForm> = handleSubmit(onsubmit);
   return (
     <div className="mt-4">
       <p className="text-primary-main-500 text-xl-4.5 pt-2.5 pb-4 font-semibold">
@@ -208,13 +187,13 @@ const PersonalRegistration = ({ schema }: any) => {
                   First Name
                 </label>
                 <input
-                  {...register("personal.firstName")}
+                  {...register("firstName")}
                   placeholder="Enter first name"
                   className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
                 />
-                {errors.personal?.firstName && (
+                {errors.firstName && (
                   <span className="text-red-700 text-xl-2 font-inter ml-2">
-                    {errors.personal?.firstName.message}
+                    {errors.firstName.message}
                   </span>
                 )}
               </div>
@@ -223,13 +202,13 @@ const PersonalRegistration = ({ schema }: any) => {
                   Last Name
                 </label>
                 <input
-                  {...register("personal.lastName")}
+                  {...register("lastName")}
                   placeholder="Enter last name"
                   className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
                 />
-                {errors.personal?.lastName && (
+                {errors.lastName && (
                   <span className="text-red-700 text-xl-2 font-inter ml-2">
-                    {errors.personal?.lastName.message}
+                    {errors.lastName.message}
                   </span>
                 )}
               </div>
@@ -240,14 +219,14 @@ const PersonalRegistration = ({ schema }: any) => {
                 Email
               </label>
               <input
-                {...register("personal.email")}
+                {...register("email")}
                 placeholder="Enter email"
                 type="email"
                 className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
               />
-              {errors.personal?.email && (
+              {errors.email && (
                 <span className="text-red-700 text-xl-2 font-inter ml-2">
-                  {errors.personal?.email.message}
+                  {errors.email.message}
                 </span>
               )}
             </div>
@@ -265,7 +244,7 @@ const PersonalRegistration = ({ schema }: any) => {
                     type="radio"
                     value="female"
                     className="h-6 w-6 rounded border-1 border-grey-300"
-                    {...register("personal.gender")}
+                    {...register("gender")}
                   />
                 </div>
 
@@ -277,13 +256,13 @@ const PersonalRegistration = ({ schema }: any) => {
                     type="radio"
                     value="male"
                     className="h-6 w-6 rounded border-1 border-grey-300"
-                    {...register("personal.gender")}
+                    {...register("gender")}
                   />
                 </div>
               </div>
-              {errors.personal?.gender && (
+              {errors.gender && (
                 <span className="text-red-700 text-xl-2 font-inter ml-2">
-                  {errors.personal?.gender.message}
+                  {errors.gender.message}
                 </span>
               )}
             </div>
@@ -304,18 +283,18 @@ const PersonalRegistration = ({ schema }: any) => {
                   placeholder="9173535098"
                   className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 "
                   onFocus={() => setInputFocued(true)}
-                  {...register("personal.phoneNumber")}
+                  {...register("phoneNumber")}
                 />
                 <span className="absolute top-1/2 right-3 -translate-y-1/2 text-primary-main-500 text-right font-inter text-xl-4 underline decoration-solid decoration-auto underline-offset-autoF">
                   VERIFY
                 </span>
               </div>
             </div>
-            {errors.personal?.phoneNumber && (
-                <span className="text-red-700 text-xl-2 font-inter ml-2">
-                  {errors.personal?.phoneNumber.message}
-                </span>
-              )}
+            {errors.phoneNumber && (
+              <span className="text-red-700 text-xl-2 font-inter ml-2">
+                {errors.phoneNumber.message}
+              </span>
+            )}
             {inputFocused && (
               <div className="flex items-center gap-1">
                 <NotificationIcon />
@@ -326,61 +305,147 @@ const PersonalRegistration = ({ schema }: any) => {
                 </p>
               </div>
             )}
-
-            <div className="flex flex-col gap-6">
-              <div>
-                <label className="text-xl-4 text-neutral-800 font-inter font-normal">
-                  Role in Church
-                </label>
-                <Controller
-                  control={control}
-                  name="personal.roleInChurch"
-                  defaultValue=""
-                  render={({ field: { onChange, value } }) => (
-                    <Select
-                      styles={customStyles}
-                      maxMenuHeight={150}
-                      onChange={HandleRoleChange}
-                      options={roles}
-                    />
-                  )}
-                />
-                {errors.personal?.roleInChurch && (
-                  <span className="text-red-700 text-xl-2 font-inter ml-2">
-                    {errors.personal?.roleInChurch.message}
-                  </span>
-                )}
-              </div>
-              {role != "" && (
+            {type == "member" && (
+              <div className="flex flex-col gap-6">
                 <div>
                   <label className="text-xl-4 text-neutral-800 font-inter font-normal">
-                    Role Type
+                    Role in Church
                   </label>
                   <Controller
                     control={control}
-                    name="personal.roleType"
-                    defaultValue=""
+                    name="roleInChurch"
                     render={({ field: { onChange, value } }) => (
                       <Select
                         styles={customStyles}
-                        // value={selectedSubRole}
-                        onChange={(option) => {
-                          onChange(option?.value)
-                          // setSelectedSubRole(option?.value)
-                        }}
+                        value={
+                          roles.find((option) => option.value == value) || null
+                        }
                         maxMenuHeight={150}
-                        options={subRole}
+                        onChange={(option) =>
+                          HandleRoleChange(option, onChange)
+                        }
+                        options={roles}
                       />
                     )}
                   />
-                  {errors.personal?.roleType && (
+                  {errors.roleInChurch && (
                     <span className="text-red-700 text-xl-2 font-inter ml-2">
-                      {errors.personal?.roleType.message}
+                      {errors.roleInChurch.message}
                     </span>
                   )}
                 </div>
-              )}
-            </div>
+                {dutyRole != "" && (
+                  <div>
+                    <label className="text-xl-4 text-neutral-800 font-inter font-normal">
+                      Role Type
+                    </label>
+                    <Controller
+                      control={control}
+                      name="roleType"
+                      render={({ field: { onChange, value } }) => (
+                        <Select
+                          styles={customStyles}
+                          value={
+                            subDutyRole.find((option) => option.value == value) ||
+                            null
+                          }
+                          onChange={(option) => {
+                            onChange(option?.value);
+                          }}
+                          maxMenuHeight={150}
+                          options={subDutyRole}
+                        />
+                      )}
+                    />
+                    {errors.roleType && (
+                      <span className="text-red-700 text-xl-2 font-inter ml-2">
+                        {errors.roleType.message}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+                <div>
+                    <label className="text-xl-4 text-neutral-800 font-inter font-normal">
+                      Relationship with child
+                    </label>
+                    <Controller
+                      control={control}
+                      name="relationshipWithChild"
+                      defaultValue=""
+                      render={({ field: { onChange, value } }) => (
+                        <Select
+                          placeholder="Select Relationship"
+                          styles={customStyles}
+                          value={Guardain.find(option => option.value == value) || null}
+                          maxMenuHeight={150}
+                          onChange={(e) => {
+                            setRole(e?.value);
+                            onChange(e?.value);
+                          }}
+                          options={Guardain}
+                        />
+                      )}
+                    />
+                    {errors.relationshipWithChild && (
+                      <span className="text-red-700 text-xl-2 font-inter ml-2">
+                        {errors.relationshipWithChild.message}
+                      </span>
+                    )}
+                  </div>
+                  {role && (
+                    <div>
+                      <label className="text-xl-4 text-neutral-800 font-inter font-normal">
+                        Relationship Type
+                      </label>
+                      <Controller
+                        control={control}
+                        name="relationshipWithParent"
+                        render={({ field: { onChange, value} }) => (
+                          <Select
+                            placeholder="Select Relationship Type"
+                            styles={customStyles}
+                            maxMenuHeight={150}
+                            value={option.find(item => item.value == value) || null}
+                            onChange={(option) => {
+                              onChange(option?.value)
+                              setSubRole(option?.value);
+                            }}
+                            options={option}
+                          />
+                        )}
+                      />
+                      {errors.relationshipWithParent && (
+                        <span className="text-red-700 text-xl-2 font-inter ml-2">
+                          {
+                            errors.relationshipWithParent
+                              .message
+                          }
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {role == "guardian" && subRole == "other" && (
+                    <div>
+                      <input
+                        {...register("other", {
+                          required: "specify a relationship",
+                        })}
+                        placeholder="Specify relationship"
+                        className="py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200 w-full"
+                      />
+                      {errors.other && (
+                        <span className="text-red-700 text-xl-2 font-inter ml-2">
+                          {
+                            errors.other
+                              .message
+                          }
+                        </span>
+                      )}
+                    </div>
+                  )}
+
           </div>
         )}
 
@@ -397,12 +462,12 @@ const PersonalRegistration = ({ schema }: any) => {
                 </label>
                 <input
                   placeholder="Enter state address"
-                  {...register("personal.streetAddress")}
+                  {...register("streetAddress")}
                   className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200"
                 />
-                {errors.personal?.streetAddress && (
+                {errors.streetAddress && (
                   <span className="text-red-700 text-xl-2 font-inter ml-2">
-                    {errors.personal?.streetAddress.message}
+                    {errors.streetAddress.message}
                   </span>
                 )}
               </div>
@@ -412,13 +477,15 @@ const PersonalRegistration = ({ schema }: any) => {
                 </label>
                 <Controller
                   control={control}
-                  name="personal.country"
-                  defaultValue=""
+                  name="country"
                   render={({ field: { onChange, value } }) => (
                     <Select
                       styles={inputStyles}
                       placeholder="Enter Country"
-                      // value={selectedSubRole}
+                      value={
+                        countries.find((option) => option.value == value) ||
+                        null
+                      }
                       onChange={(option) => {
                         setSelectedCountry(option?.value);
                         onChange(option?.value);
@@ -428,9 +495,9 @@ const PersonalRegistration = ({ schema }: any) => {
                     />
                   )}
                 />
-                {errors.personal?.country && (
+                {errors.country && (
                   <span className="text-red-700 text-xl-2 font-inter ml-2">
-                    {errors.personal?.country.message}
+                    {errors.country.message}
                   </span>
                 )}
               </div>
@@ -444,13 +511,14 @@ const PersonalRegistration = ({ schema }: any) => {
                   </label>
                   <Controller
                     control={control}
-                    name="personal.state"
-                    defaultValue=""
+                    name="state"
                     render={({ field: { onChange, value } }) => (
                       <Select
                         styles={inputStyles}
                         placeholder="Enter State"
-                        // value={selectedSubRole}
+                        value={
+                          state?.find((option) => option.value == value) || null
+                        }
                         onChange={(option) => {
                           setSelectedState(option?.value);
                           onChange(option?.value);
@@ -460,9 +528,9 @@ const PersonalRegistration = ({ schema }: any) => {
                       />
                     )}
                   />
-                  {errors.personal?.state && (
+                  {errors.state && (
                     <span className="text-red-700 text-xl-2 font-inter ml-2">
-                      {errors.personal?.state.message}
+                      {errors.state.message}
                     </span>
                   )}
                 </div>
@@ -472,13 +540,14 @@ const PersonalRegistration = ({ schema }: any) => {
                   </label>
                   <Controller
                     control={control}
-                    name="personal.lga"
-                    defaultValue=""
+                    name="lga"
                     render={({ field: { onChange, value } }) => (
                       <Select
                         styles={inputStyles}
                         placeholder="Enter LGA/City"
-                        // value={selectedSubRole}
+                        value={
+                          lga?.find((option) => option.value == value) || null
+                        }
                         onChange={(option) => {
                           onChange(option?.value);
                         }}
@@ -487,46 +556,50 @@ const PersonalRegistration = ({ schema }: any) => {
                       />
                     )}
                   />
-                  {errors.personal?.lga && (
+                  {errors.lga && (
                     <span className="text-red-700 text-xl-2 font-inter ml-2">
-                      {errors.personal?.lga.message}
+                      {errors.lga.message}
                     </span>
                   )}
                 </div>
               </div>
-
-              <div className="flex flex-col gap-9">
-                <p className="text-xl-4 text-neutral-800 font-inter font-normal">
-                  Church Details
-                </p>
-                <div className="w-full">
-                  <label className="text-xl-4 text-neutral-800 font-inter font-normal">
-                    Church Branch
-                  </label>
-                  <Controller
-                    control={control}
-                    name="personal.branch"
-                    defaultValue=""
-                    render={({ field: { onChange, value } }) => (
-                      <Select
-                        styles={inputStyles}
-                        placeholder="Enter Church Branch"
-                        // value={selectedSubRole}
-                        onChange={(option) => {
-                          onChange(option?.value);
-                        }}
-                        maxMenuHeight={150}
-                        options={BranchOptions}
-                      />
+              {type == "member" && (
+                <div className="flex flex-col gap-9">
+                  <p className="text-xl-4 text-neutral-800 font-inter font-normal">
+                    Church Details
+                  </p>
+                  <div className="w-full">
+                    <label className="text-xl-4 text-neutral-800 font-inter font-normal">
+                      Church Branch
+                    </label>
+                    <Controller
+                      control={control}
+                      name="branch"
+                      render={({ field: { onChange, value } }) => (
+                        <Select
+                          styles={inputStyles}
+                          placeholder="Enter Church Branch"
+                          value={
+                            BranchOptions?.find(
+                              (option) => option.value == value
+                            ) || null
+                          }
+                          onChange={(option) => {
+                            onChange(option?.value);
+                          }}
+                          maxMenuHeight={150}
+                          options={BranchOptions}
+                        />
+                      )}
+                    />
+                    {errors.branch && (
+                      <span className="text-red-700 text-xl-2 font-inter ml-2">
+                        {errors.branch.message}
+                      </span>
                     )}
-                  />
-                  {errors.personal?.branch && (
-                    <span className="text-red-700 text-xl-2 font-inter ml-2">
-                      {errors.personal?.branch.message}
-                    </span>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             <div className="flex flex-col gap-9">
               <p className="text-xl-4 text-neutral-800 font-inter font-normal">
@@ -538,13 +611,17 @@ const PersonalRegistration = ({ schema }: any) => {
                 </label>
                 <Controller
                   control={control}
-                  name="personal.identificationType"
+                  name="identificationType"
                   defaultValue=""
                   render={({ field: { onChange, value } }) => (
                     <Select
                       styles={inputStyles}
                       placeholder="Enter Identification Type"
-                      // value={selectedSubRole}
+                      value={
+                        identificationOptions.find(
+                          (option) => option.value == value
+                        ) || null
+                      }
                       onChange={(option) => {
                         setIdentification(option?.value);
                         onChange(option?.value);
@@ -554,18 +631,14 @@ const PersonalRegistration = ({ schema }: any) => {
                     />
                   )}
                 />
-
-                {/* <select className="w-full py-4 px-3 leading-6 font-normal text-xl-4 font-inter border-1 rounded border-neutral-200">
-                  <option disabled>Select Identification Type</option>
-                </select> */}
-                {errors.personal?.identificationType && (
+                {errors.identificationType && (
                   <span className="text-red-700 text-xl-2 font-inter ml-2">
-                    {errors.personal?.identificationType.message}
+                    {errors.identificationType.message}
                   </span>
                 )}
               </div>
-              {identification && (
-                <Identification identification={identification} />
+              {getValues("identificationType") && (
+                <Identification identification={identification as string} />
               )}
             </div>
           </div>
@@ -595,11 +668,7 @@ const PersonalRegistration = ({ schema }: any) => {
             </Button>
           )}
 
-          {step == 1 && (
-            <Button type="submit">
-              Save and Proceed
-            </Button>
-          )}
+          {step == 1 && <Button type="submit">Save and Proceed</Button>}
         </div>
       </form>
     </div>
