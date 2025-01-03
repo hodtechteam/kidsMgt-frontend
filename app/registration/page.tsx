@@ -148,7 +148,7 @@ export default function Registration() {
 
         <Image
           alt="children"
-          src="registration_image.png"
+          src="/registration_image.png"
           layout="fill"
           objectFit="contain"
           // style={{ width: "auto", height: "auto" }}

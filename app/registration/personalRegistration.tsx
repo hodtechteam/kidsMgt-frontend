@@ -27,7 +27,6 @@ const PersonalRegistration = ({ type }: { type: string }) => {
   const [dutyRole, setDutyRole] = useState<string | undefined>("");
   const [subDutyRole, setDutySubRole] = useState<ISubDirectory[] | []>([]);
 
-  // localStorage.clear()
   const [selectedCountry, setSelectedCountry] = useState<string | undefined>(
     undefined
   );
@@ -56,12 +55,7 @@ const PersonalRegistration = ({ type }: { type: string }) => {
   const context = useContext(NavigationContext);
   const localData = localStorage.getItem("payload");
   const savedData = localData ? JSON.parse(localData)["personal"] : defaultValue;
-
-
-
-
-
-
+  
   const [inputFocused, setInputFocued] = useState(false);
   const customStyles: StylesConfig<{ value: string; label: string }, false> = {
     control: () => ({

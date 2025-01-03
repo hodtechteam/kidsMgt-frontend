@@ -1,20 +1,16 @@
 "use client";
-import { useEffect, useState, useContext} from "react";
+import { useEffect, useState, useContext } from "react";
 import { DatePicker, DateValue } from "@mantine/dates";
 import Photo from "../components/photo";
 import Plus from "../svg/plus";
 import { DatePickerIcon } from "../svg/datePicker";
 import { CheckBoxIcon } from "../svg/checkbox";
 import { useClickOutside } from "@mantine/hooks";
-import {
-  Controller,
-  useFieldArray,
-  useForm,
-} from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash } from "../svg/trash";
 import { ArrowDown } from "../svg/arrowDown";
-import { childArraySchema, ChildArraySchemaType, childSchema} from "./schema";
+import { childArraySchema, ChildArraySchemaType, childSchema, ChildSchema } from "./schema";
 import { ArrowUp } from "../svg/arrowUp";
 import { NavigationContext } from "./context/context";
 
@@ -24,24 +20,35 @@ const ChildRegistration = () => {
   const ref = useClickOutside(() => setOpened(false));
   const context = useContext(NavigationContext);
 
-
+  interface SavedData {
+    child: ChildSchema[];
+  }
 
   const defaultValue = {
     firstName: "",
     lastName: "",
     gender: undefined,
-    dob: new Date(),
+    dob: null,
     ageGroup: "",
     relationshipWithChild: "",
     relationshipWithParent: "",
     specialNeed: "",
     other: "",
-  };
+  }
 
   const localData = localStorage.getItem("payload");
-  const savedData = localData ? JSON.parse(localData)["child"] : {
-    child: [defaultValue],
-  };
+    let savedData:SavedData = {
+      child: [defaultValue]
+    };
+    let parsedData:SavedData;
+    if(localData){
+      parsedData = JSON.parse(localData);
+       savedData = "child" in parsedData ? parsedData : {
+        child: [defaultValue]
+      };
+
+    }
+
 
   const {
     register,
@@ -54,25 +61,23 @@ const ChildRegistration = () => {
     resolver: zodResolver(childArraySchema),
     defaultValues: savedData,
   });
-
-
-    useEffect(()=> {
-      const child = getValues("child");
-      child.map(item => {
-        const date = new Date(item.dob);
-        
-        setFormattedDate(date.toISOString().slice(0, 10));
-      })
-    },[getValues])
-
   const { fields, append, remove } = useFieldArray({
     name: "child",
     control,
   });
 
+  useEffect(() => {
+
+    if(parsedData){
+    savedData.child.forEach((item: ChildSchema, index: number) => {
+      item.dob = new Date(item.dob!);
+      setValue(`child.${index}.dob`, item.dob);
+      setFormattedDate(item.dob.toISOString().slice(0, 10));
+    });
+    }
+  }, [getValues]);
 
   const [id, setId] = useState(0);
-
   const ageGroups = [
     "Creche (6 months - 1 year)",
     "Ages 1 - 3",
@@ -108,20 +113,19 @@ const ChildRegistration = () => {
     setFormattedDate(date!.toISOString().slice(0, 10));
   };
 
-
   const onSubmit = (data: ChildArraySchemaType) => {
-    const payload = {
-      child: data
-    }
+    const payload = data;
     if (!localStorage.getItem("payload")) {
-      // localStorage.setItem("payload", JSON.stringify(payload));
     } else {
-      const localData = localStorage.getItem("payload")
+      const localData = localStorage.getItem("payload");
       const savedData = localData ? JSON.parse(localData) : {};
-      localStorage.setItem("payload", JSON.stringify({...savedData, ...payload}));
+      localStorage.setItem(
+        "payload",
+        JSON.stringify({ ...savedData, ...payload })
+      );
     }
     try {
-      context?.setUserRole("caregiver")
+      context?.setUserRole("caregiver");
     } catch (error) {
       console.log("validation error", error, "errors", errors);
     }
@@ -281,14 +285,17 @@ const ChildRegistration = () => {
                           control={control}
                           name={`child.${index}.dob`}
                           render={({ field: { onChange, value } }) => (
-
                             <DatePicker
                               ref={ref}
                               onChange={(date: DateValue) => {
                                 onChange(date);
                                 AddAgeGroup(date, index);
                               }}
-                              value={typeof value === "string" ? new Date(value) : value}
+                              value={
+                                typeof value === "string"
+                                  ? new Date(value)
+                                  : value
+                              }
                               style={{
                                 position: "absolute",
                                 zIndex: 9,
@@ -311,11 +318,10 @@ const ChildRegistration = () => {
                       <p className="font-inter text-xl-4 text-neutral-800 mb-2 flex items-center">
                         Age Division
                       </p>
-                     
+
                       <div className="grid lg:grid-cols-2 gap-y-6">
                         {ageGroups.map((item, ageGroupIndex) => (
-                          
-                          <div className="flex gap-2" key={ageGroupIndex}>                             
+                          <div className="flex gap-2" key={ageGroupIndex}>
                             <CheckBoxIcon
                               state={
                                 item === getValues(`child.${index}.ageGroup`)
