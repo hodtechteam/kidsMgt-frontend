@@ -42,12 +42,12 @@ export const personalSchema = z.object({
       gender: z.enum(["male", "female"], {
         required_error: "Gender is required",
       }).optional(),
-      dob: z.date(),
+      dob: z.date().nullable(),
       ageGroup: z
         .string()
         .nonempty("Age Group cannot be empty, select a valid dob"),
       specialNeed: z.string(),
-    })
+    });
 
       
       export const careGiverSchema = z
@@ -98,4 +98,6 @@ export const personalSchema = z.object({
     export type ChildArraySchemaType = z.infer<typeof childArraySchema>;
     export type caregiverArraySchemaType = z.infer<typeof caregiverArraySchema>;
     export type FormSchemaType = z.infer<typeof Userschema>;
+
+    export type ChildSchema = z.infer<typeof childSchema>;
     
