@@ -2,13 +2,6 @@ import React from 'react'
 
 const Photo = () => {
   return (
-    <div>
-    <label className="font-inter text-xl-4 text-neutral-800">
-      Child Passport Photograph{" "}
-      <span className="font-inter text-xl-4 text-neutral-700">
-        (Taken in the last six months)
-      </span>
-    </label>
     <div className="flex px-4 py-4 rounded border-1 border-grey-200 mt-2 gap-2">
       <div>
         <svg
@@ -43,7 +36,6 @@ const Photo = () => {
         </p>
       </div>
     </div>
-  </div>
   )
 }
 

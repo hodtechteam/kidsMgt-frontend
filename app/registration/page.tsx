@@ -1,20 +1,15 @@
 "use client";
 import Link from "next/link";
-import { useState, createContext, useMemo } from "react";
-import ChildRegistration from "./childRegistration";
-import PersonalRegistration from "./personalRegistration";
-import CaregiverRegistration from "./caregiveRegistration";
+import { useState } from "react";
 import { NavigationContext } from "./context/context";
 import Navigation from "./navigation";
+import Image from "next/image";
+import { useSearchParams } from "next/navigation";
+
 
 export default function Registration() {
   const [userRole, setUserRole] = useState("personal");
-  const [activeRoles, setActiveRoles] = useState([]);
-
-
-  // useMemo(setActiveRoles({
-
-  // }), userRole)
+  const type = useSearchParams().get("type");
 
 
   return (
@@ -43,38 +38,38 @@ export default function Registration() {
             </span>
           </Link>
           <h2 className="text-xl-5 mt-6 font-inter font-semibold text-neutral-800">
-            Member/First Timer
+           {
+              type == "member" ?  "Member/First Timer" : "Visitor"
+           } 
           </h2>
           <p className="text-xl-3 mt-2 font-inter leading-20">
-            An HOD member or would you like to be an HOD member
+            {
+              type == "member" ? "An HOD member":  "First time visiting or just visiting and don't intend to be a member "
+            }
           </p>
 
           <div className="flex items-center justify-between mt-8">
             <div
               className={`
-                  ${
-                    userRole == "personal"
-                      ? "flex border-red-600"
-                      : "hidden border-neutral-600"
-                  }
-                  
-                   lg:flex
-                   items-center 
-                  rounded-full  border-1 p-2 gap-2
-                  
-                `}
+                ${
+                  userRole == "personal"
+                    ? "flex border-red-600"
+                    : "hidden border-neutral-600"
+                }
+            
+                lg:flex
+                items-center 
+                rounded-full  border-1 p-2 gap-2
+            
+              `}
             >
               <div
                 className={`
-                ${
-                  userRole == "personal"
-                    ? "border-red-600"
-                    : "border-neutral-600"
-                }
-                rounded-full 
-                py-1 px-2.5 
-                border-1 flex items-center justify-center`}
-              >
+                  ${userRole == "personal" ? "border-red-600" : "border-neutral-600"}
+                  rounded-full 
+                  py-1 px-2.5 
+                  border-1 flex items-center justify-center`}
+                  >
                 <span>1</span>
               </div>
 
@@ -87,26 +82,22 @@ export default function Registration() {
             <div
               // className="flex items-center justify-between rounded-full border-neutral-600 border-1 p-2 gap-2"
               className={`
-                ${
-                  userRole == "child"
-                    ? "flex border-red-600"
-                    : "hidden border-neutral-600"
-                }
-                lg:flex
-                items-center 
-                rounded-full border-neutral-600 border-1 p-2 gap-2
-                
-              `}
+          ${
+            userRole == "child"
+              ? "flex border-red-600"
+              : "hidden border-neutral-600"
+          }
+          lg:flex
+          items-center 
+          rounded-full border-neutral-600 border-1 p-2 gap-2
+          
+        `}
             >
               <div
                 className={`
-                ${
-                  userRole == "child"
-                    ? "border-red-600"
-                    : "border-neutral-600"
-                }
-              rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center`}
-              >
+                  ${userRole == "child" ? "border-red-600" : "border-neutral-600"}
+                rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center`}
+                      >
                 <span>2</span>
               </div>
 
@@ -114,40 +105,55 @@ export default function Registration() {
                 Child Informtion
               </p>
             </div>
-            <div className="h-[1px] bg-gray-400 mx-2 flex-1 lg:block hidden"></div>
-            <div
-              // className="flex items-center justify-between rounded-full border-neutral-600 border-1 p-2 gap-2"
-              className={`
-                ${userRole == "caregiver" ? "flex border-red-600 " : "hidden border-neutral-600"}
-                lg:flex
-                items-center 
-                rounded-full border-neutral-600 border-1 p-2 gap-2
-                
-              `}
-            >
-              <div className={`
-                ${
-                  userRole == "caregiver"
-                    ? "border-red-600"
-                    : "border-neutral-600"
-                }
-                    rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center`}>
-                <span>3</span>
-              </div>
-
-              <p className="text-xl-2 font-inter font-medium text-neutral-800">
-                Caregiver Informtion
-              </p>
-            </div>
+              {type == "member" && <div className="h-[1px] bg-gray-400 mx-2 flex-1 lg:block hidden"></div>}
+              {
+                type == "member" && (
+                  <div
+                  // className="flex items-center justify-between rounded-full border-neutral-600 border-1 p-2 gap-2"
+                  className={`
+                    ${
+                      userRole == "caregiver"
+                        ? "flex border-red-600 "
+                        : "hidden border-neutral-600"
+                    }
+                    lg:flex
+                    items-center 
+                    rounded-full border-neutral-600 border-1 p-2 gap-2
+                    
+                  `}
+                >
+                  <div
+                    className={`
+                     ${userRole == "caregiver" ? "border-red-600" : "border-neutral-600"}
+                  rounded-full border-neutral-600 py-1 px-2.5  border-1 flex items-center justify-center`}
+                  >
+                    <span>3</span>
+                  </div>
+    
+                  <p className="text-xl-2 font-inter font-medium text-neutral-800">
+                    Caregiver Informtion
+                  </p>
+                </div>
+                )
+              }
           </div>
 
           <NavigationContext.Provider value={{ userRole, setUserRole }}>
-            <Navigation />
+            <Navigation type={type as string} />
           </NavigationContext.Provider>
         </div>
       </div>
 
-      <div className="bg-gray-900 flex-1 overflow-auto lg:flex-[4] lg:block hidden"></div>
+      <div className="flex-1 overflow-auto lg:flex-[4] lg:block hidden bg-black relative">
+
+        <Image
+          alt="children"
+          src="registration_image.png"
+          layout="fill"
+          objectFit="contain"
+          // style={{ width: "auto", height: "auto" }}
+        />
+      </div>
     </div>
   );
 }

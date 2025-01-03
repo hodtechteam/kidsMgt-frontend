@@ -1,0 +1,9 @@
+# Ignore minified files
+dist/
+build/
+public/
+*.min.js
+*.config.ts
+
+# Ignore compiled TypeScript files
+*.js
