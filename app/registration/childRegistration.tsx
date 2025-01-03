@@ -48,8 +48,6 @@ const ChildRegistration = () => {
       };
 
     }
-
-
   const {
     register,
     control,
@@ -67,15 +65,17 @@ const ChildRegistration = () => {
   });
 
   useEffect(() => {
-
     if(parsedData){
+      console.log("ExECUTING HERE")
     savedData.child.forEach((item: ChildSchema, index: number) => {
       item.dob = new Date(item.dob!);
       setValue(`child.${index}.dob`, item.dob);
+
+
       setFormattedDate(item.dob.toISOString().slice(0, 10));
     });
     }
-  }, [getValues]);
+  }, []);
 
   const [id, setId] = useState(0);
   const ageGroups = [
@@ -108,9 +108,11 @@ const ChildRegistration = () => {
   };
 
   const AddAgeGroup = (date: Date | null, index: number) => {
-    const ageGroup = calculateAgeGroup(date!);
-    setValue(`child.${index}.ageGroup`, ageGroup, { shouldValidate: true });
-    setFormattedDate(date!.toISOString().slice(0, 10));
+    if(date != null){
+      const ageGroup = calculateAgeGroup(date);
+      setValue(`child.${index}.ageGroup`, ageGroup, { shouldValidate: true });
+      setFormattedDate(date.toISOString().slice(0, 10));
+    }
   };
 
   const onSubmit = (data: ChildArraySchemaType) => {
@@ -141,9 +143,24 @@ const ChildRegistration = () => {
     }
   };
 
+  const removeData = (index: number) => {
+    remove(index);
+    const childData = getValues('child');
+    const data = {
+      child: childData
+    }
+    if (localStorage.getItem("payload")) {
+      const localData = localStorage.getItem("payload");
+      const savedData = localData ? JSON.parse(localData) : {};
+      localStorage.setItem(
+        "payload",
+        JSON.stringify({ ...savedData, data})
+      );
+    }
+  }
+
   useEffect(() => {
     setId(fields.length - 1);
-    console.log("Fields updated:", fields, "id", fields.length - 1);
   }, [fields]);
 
   return (
@@ -176,7 +193,7 @@ const ChildRegistration = () => {
                   `}</span>
 
                 <div className="flex items-center">
-                  <Trash onClick={() => remove(index)} />
+                  <Trash onClick={() => removeData(index)} />
                   <div onClick={() => setId(index)}>
                     {index == id ? <ArrowUp /> : <ArrowDown />}
                   </div>
