@@ -42,20 +42,31 @@ const PersonalRegistration = ({ type }: { type: string }) => {
     lastName: "",
     gender: undefined,
     email: "",
+    phoneNumber: "",
     roleInChurch: "",
     roleType: "",
+    relationshipWithChild: "",
+    relationshipWithParent: "",
     streetAddress: "",
     country: "",
     state: "",
     lga: "",
     branch: "",
     identificationType: "",
+    identification: ""
   };
 
   const context = useContext(NavigationContext);
-  const localData = localStorage.getItem("payload");
-  const savedData = localData ? JSON.parse(localData)["personal"] : defaultValue;
   
+  let savedData: PersonalSchemaType  = defaultValue;
+  if (typeof window !== "undefined" && window.localStorage) {
+    const localData = localStorage.getItem("payload");
+    console.log("payload", localData);
+    savedData = localData ? JSON.parse(localData)["personal"] : defaultValue;
+  }
+
+  console.log("Saved data", savedData);
+
   const [inputFocused, setInputFocued] = useState(false);
   const customStyles: StylesConfig<{ value: string; label: string }, false> = {
     control: () => ({
