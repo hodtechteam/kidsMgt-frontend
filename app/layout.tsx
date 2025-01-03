@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
 import "./globals.css";
+import { Suspense } from 'react';
 
 
 const geistSans = localFont({
@@ -35,9 +36,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <MantineProvider>
-          {children}
-        </MantineProvider>
+        <Suspense fallback={<div>Loading...</div>}>
+          <MantineProvider>
+            {children}
+          </MantineProvider>
+        </Suspense>
+
   
       </body>
     </html>
